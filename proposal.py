@@ -38,3 +38,11 @@ def proposal_distribution(parameter, x, tuning=1):
             return -np.inf
         else:
             return n
+
+    elif parameter == 'merg z1':
+        # Low redshift rate for mergers
+        n = np.random.normal(x, tuning)
+        if inbounds(n, parameter) is not True:
+            return -np.inf
+        else:
+            return n

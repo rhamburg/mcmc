@@ -15,8 +15,8 @@ parser = ArgumentParser(prog='Thesis Program', description='Fitting GBM Peak Flu
 parser.add_argument('-f', '--filename', help='Filename to save results under')
 parser.add_argument('-i', '--iter', help='Number of MCMC iterations to make', type=int)
 parser.add_argument('-p', '--plotGRB', help='Boolean for plotting peak flux info')
+parser.add_argument('-n', '--num_param', help='Number of parmeters to search')
 args = parser.parse_args()
-num_param = 4
 
 if args.iter is None:
     args.iter = 0
@@ -24,7 +24,10 @@ if args.plotGRB is not None:
     plot = args.plotGRB
 else:
     plot = None
-
+if args.num_param is None:
+    raise Exception('Need to specifiy number of parameters to search')
+else:
+    num_param = args.num_param
 if args.filename is not None:
     file = 'results/'+args.filename+'.npy'
 
