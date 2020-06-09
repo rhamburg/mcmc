@@ -46,3 +46,30 @@ def proposal_distribution(parameter, x, tuning=1):
             return -np.inf
         else:
             return n
+
+    elif parameter == 'merg z2':
+        # Low redshift rate for mergers
+        n = np.random.normal(x, tuning)
+        if inbounds(n, parameter) is not True:
+            return -np.inf
+        else:
+            return n
+
+    elif parameter == 'merg z*':
+        # Collapsar Redshift peak
+        n = np.random.normal(x, tuning*2)
+        if inbounds(n, parameter) is not True:
+            return -np.inf
+        else:
+            return  n
+
+    elif parameter == 'merg rho0':
+        # Local redshift rate for collapsars
+        n = np.random.normal(x, tuning*2)
+        if inbounds(n, parameter) is not True:
+            return -np.inf
+        else:
+            return n
+    
+    else:
+        print ('parameter not found')

@@ -252,7 +252,6 @@ def metro_hastings(current_post=None, proposed_post=None, current_param=None,
 p_accept=None, total_accept=None, proposed_param=None):
     rand_num = np.random.uniform(0,1)
     H = np.minimum(1, proposed_post / current_post)
-    #print(H, rand_num)
     if H >= rand_num:
         # accept candidate
         # update acceptance ratios
@@ -271,6 +270,7 @@ Metro-hastings decision algorithm
 def metro_hastings_test(current_val, proposed_val, current_post, proposed_post):
     rand_num = np.random.uniform(0,1)
     H = np.minimum(1., np.exp(proposed_post - current_post))
+    #print(H, rand_num)
     if H >= rand_num:
         # accept candidate
         print ('accept')

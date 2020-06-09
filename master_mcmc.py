@@ -18,6 +18,7 @@ parser.add_argument('-p', '--plotGRB', help='Boolean for plotting peak flux info
 parser.add_argument('-n', '--num_param', help='Number of parmeters to search')
 args = parser.parse_args()
 
+
 if args.iter is None:
     args.iter = 0
 if args.plotGRB is not None:
@@ -27,9 +28,10 @@ else:
 if args.num_param is None:
     raise Exception('Need to specifiy number of parameters to search')
 else:
-    num_param = args.num_param
+    num_param = int(args.num_param)
 if args.filename is not None:
     file = 'results/'+args.filename+'.npy'
+
 
 config = ConfigParser()
 config_file = 'parameters.ini'
@@ -47,7 +49,6 @@ print ('\nGRB Peak Flux Simulator\n')
 # Read GBM data [peak flux 10-1000 keV]
 print ('Reading data file...')
 obs_pf = read_data()
-
 
 # Luminosity info
 print ('IS NSIM HIGH ENOUGH?')
@@ -133,6 +134,7 @@ parameter_space[0] = [redshift.getfloat('coll_n1'),
                         luminosity.getfloat('merg_alpha'),
                         luminosity.getfloat('merg_beta'), 1., 0., 0]
 
+''' 
 # Loop through each tuning parameter
 burn_out = False
 if burn_out is not False:
@@ -140,7 +142,8 @@ if burn_out is not False:
 else:
     tuning = [1.]
 
-''' implement burn in stuff here '''
+implement burn in stuff here
+'''
 
 # Start loop
 # parameter index
@@ -163,6 +166,7 @@ for i in range(0, args.iter+1):
         # Update parameter_space[i] with random proposed value
         parameter_space[i][pdx] = proposal_distribution(keyword[0],
             current_value)
+        print (current_value, parameter_space[i][pdx])
 
     # If parameter is out of prior bounds, do not calculate likelihood.
     # Set posterior equal to the proposal (i.e., -inf).
@@ -176,7 +180,6 @@ for i in range(0, args.iter+1):
             num_param, detector=detector,
             redshifts=redshifts, luminosities=luminosities, obs_pf=obs_pf,
             dl=dl, options=options, vol_arr=v_comov, kc=kcorr, plot_GRB=plot)
-   
     if i > 0:
         # Previous parameter_space entry with parameter pdx
         step_back = np.maximum(0,i-num_param)
