@@ -162,11 +162,12 @@ def trace(step, x, label=None):
     return
 
 
-def plot_autocorrelation(x, label=None):
+def plot_autocorrelation(x, maxlag=1000, label=None):
     # Compute autocoreelation function for chain
-    lags = np.arange(0, 1000)
-    rho = autocorrelation(x, lags)
-    plt.plot(lags, rho, label=label)
+    lags = np.arange(0, maxlag)
+    for i in range(len(x)):
+        rho = autocorrelation(x[i], lags)
+        plt.plot(lags, rho, label=label[i])
     plt.xlabel(r'lag $k$')
     plt.ylabel(r'estimated autocorrelation $\rho(k)$')
     plt.title('Correlation between every kth sample of MCMC chain')
@@ -189,44 +190,56 @@ def llr(i, x):
 def plot_parameter_grid(first, second=None, third=None, fourth=None):
     fig = plt.figure(figsize=(9,9))
     grid = plt.GridSpec(4, 4)
+    dot_size = 4
+    numbins = 20
 
-    # LEFT-MOST ROW
+    ## FIRST ROW
     # Histogram of first parameter
     f = plt.subplot(grid[0, 0])
-    h = f.hist(first, bins=30, histtype='step')
+    h = f.hist(first, bins=numbins, histtype='step')
     plt.vlines(np.median(first), 0, np.max(h[0]), linestyle='--', color='red')
     plt.ylabel('coll z1')
     # Scatter plot of first parameter and second parameter
     f_corr = plt.subplot(grid[1, 0])
-    f_corr.scatter(first, second, s=2)
+    f_corr.scatter(first, second, s=dot_size)
     plt.ylabel('coll z2')
     # Scatter plot of first parameter and third parameter
     f_sec_corr = plt.subplot(grid[2, 0])
-    f_sec_corr.scatter(first, third, s=2)
+    f_sec_corr.scatter(first, third, s=dot_size)
     plt.ylabel('coll z*')
     # Scatter plot of first parameter and fourth parameter
     f_thi_corr = plt.subplot(grid[3, 0])
-    f_thi_corr.scatter(first, fourth, s=2)
-    plt.ylabel('coll rho0')
+    f_thi_corr.scatter(first, fourth, s=dot_size)
     plt.xlabel('coll z1')
 
-    # MIDDLE ROW
+    ## SECOND ROW
     # Histogram of second parameter
     s = plt.subplot(grid[1, 1])
-    h = s.hist(second, bins=20, histtype='step')
+    h = s.hist(second, bins=numbins, histtype='step')
     plt.vlines(np.median(second), 0, np.max(h[0]), linestyle='--', color='red')
     # Scatter plot of second parameter and third
-    second_corr = plt.subplot(grid[2, 1])
-    second_corr.scatter(second, third, s=2)
-    #plt.yticks([])
+    s_corr = plt.subplot(grid[2, 1])
+    s_corr.scatter(second, third, s=dot_size)
+    # Scatter plot of second parameter and fourth parameter
+    s_sec_corr = plt.subplot(grid[3, 1])
+    s_sec_corr.scatter(second, fourth, s=dot_size)
     plt.xlabel('coll z2')
 
-    # Third row
+    ## THIRD ROW
     t = plt.subplot(grid[2, 2])
-    h = t.hist(third, bins=20, histtype='step')
+    h = t.hist(third, bins=numbins, histtype='step')
     plt.vlines(np.median(third), 0, np.max(h[0]), linestyle='--', color='red')
-    #plt.yticks([])
+    # Scatter plot of third parameter and fourth
+    t_corr = plt.subplot(grid[3, 2])
+    t_corr.scatter(third, fourth, s=dot_size)
     plt.xlabel('coll z*')
+    plt.ylabel('coll rho0')
+
+    # FOURTH ROW
+    f2 = plt.subplot(grid[3, 3])
+    h = f2.hist(fourth, bins=numbins, histtype='step')
+    plt.vlines(np.median(fourth), 0, np.max(h[0]), linestyle='--', color='red')
+    plt.xlabel('coll rho0')
 
     # Finish
     plt.tight_layout()
