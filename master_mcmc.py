@@ -15,6 +15,7 @@ parser = ArgumentParser(prog='Thesis Program', description='Fitting GBM Peak Flu
 parser.add_argument('-f', '--filename', help='Filename to save results under')
 parser.add_argument('-i', '--iter', help='Number of MCMC iterations to make', type=int)
 parser.add_argument('-p', '--plotGRB', help='Boolean for plotting peak flux info')
+parser.add_argument('-c', '--config', help='Path to config file to initialize parameters')
 args = parser.parse_args()
 num_param = 4
 
@@ -24,12 +25,14 @@ if args.plotGRB is not None:
     plot = args.plotGRB
 else:
     plot = None
-
 if args.filename is not None:
     file = 'results/'+args.filename+'.npy'
+if args.config is not None:
+    config_file = args.config
+else:
+    config_file = 'parameters.ini'
 
 config = ConfigParser()
-config_file = 'parameters.ini'
 config.read(config_file)
 iterations = config['iterations']
 detector = config['detector']
@@ -173,16 +176,16 @@ for i in range(0, args.iter+1):
             num_param, detector=detector,
             redshifts=redshifts, luminosities=luminosities, obs_pf=obs_pf,
             dl=dl, options=options, vol_arr=v_comov, kc=kcorr, plot_GRB=plot)
-   
+
     if i > 0:
         # Previous parameter_space entry with parameter pdx
         step_back = np.maximum(0,i-num_param)
-        
+
         # Metro-Hastings decision algorithm
         # Change only if parameter is rejected, which should be most of the time
         # (probably more efficient if only change if parameter is accepted,
         # but doesn't work with my code right now)
-        
+
         # Give proposed parameter, LL with proposed parameter, previous parameter
         # acceptance ratio, and total acceptance ratio
         parameter_space[i][pdx], parameter_space[i][post_idx], \
@@ -193,10 +196,10 @@ for i in range(0, args.iter+1):
                 proposed_post=parameter_space[i][post_idx],
                 total_accept=total_accept,
                 p_accept=parameter_space[step_back][p_accept_idx])
-    
+
         # Record the effective step of the parameter
         parameter_space[i][eff_step_idx] = eff_step
-        
+
     if i > 0:
         # Restart parameter loop if reached the end
         pdx += 1
