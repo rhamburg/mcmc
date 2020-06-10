@@ -15,11 +15,8 @@ parser = ArgumentParser(prog='Thesis Program', description='Fitting GBM Peak Flu
 parser.add_argument('-f', '--filename', help='Filename to save results under')
 parser.add_argument('-i', '--iter', help='Number of MCMC iterations to make', type=int)
 parser.add_argument('-p', '--plotGRB', help='Boolean for plotting peak flux info')
-<<<<<<< HEAD
 parser.add_argument('-n', '--num_param', help='Number of parmeters to search')
-=======
 parser.add_argument('-c', '--config', help='Path to config file to initialize parameters')
->>>>>>> master
 args = parser.parse_args()
 
 
