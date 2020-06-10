@@ -157,22 +157,25 @@ dl=None, plotting=False):
     pf = (1+z) * (L / (4 * np.pi * dl**2)) * kcorr
     corr_pf = np.array(pf)
     # Correct for GBM FOV
-    num_fov = int(len(corr_pf) * 0.67 * 0.85)
-    idx_fov = random.random_integers(0, len(corr_pf)-1, num_fov)
-    corr_pf = corr_pf[idx_fov]
-    L = L[idx_fov]
-    z = z[idx_fov]
-    # Take peak fluxes above detection limit
-    detected = det_thresh(corr_pf, kind='prob')
-    final_pf = corr_pf[detected]
-    final_l = L[detected]
-    final_z = z[detected]
-    # Plot stuff
-    if plotting is not False:
-        plot_peak_flux_color(final_l, final_z, final_pf)
-        plot_obs_lum(final_l)
-        plot_obs_rate(final_z)
-    return corr_pf, final_pf
+    if len(corr_pf) > 0:
+        num_fov = int(len(corr_pf) * 0.67 * 0.85)
+        idx_fov = random.random_integers(0, len(corr_pf)-1, num_fov)
+        corr_pf = corr_pf[idx_fov]
+        L = L[idx_fov]
+        z = z[idx_fov]
+        # Take peak fluxes above detection limit
+        detected = det_thresh(corr_pf, kind='prob')
+        final_pf = corr_pf[detected]
+        final_l = L[detected]
+        final_z = z[detected]
+        # Plot stuff
+        if plotting is not False:
+            plot_peak_flux_color(final_l, final_z, final_pf)
+            plot_obs_lum(final_l)
+            plot_obs_rate(final_z)
+        return corr_pf, final_pf
+    else:
+        return [], []
  
 
 """
