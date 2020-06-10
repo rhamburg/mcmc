@@ -142,6 +142,7 @@ def plot_obs_lum(final_l):
     plt.close()
     return
 
+
 # obs grb rate
 def plot_obs_rate(final_z):
     plt.hist(final_z, bins=30)
@@ -152,8 +153,6 @@ def plot_obs_rate(final_z):
 
 def trace(step, x, label=None):
     # Trace plots of parameters
-    # Should see that parameters are fully exploring prior distributions,
-    # like a hairy caterpillar
     plt.plot(step, x, label=label)
     plt.legend()
     plt.xlabel('iteration')
@@ -161,6 +160,79 @@ def trace(step, x, label=None):
     plt.show()
     plt.close()
     return
+
+
+def plot_autocorrelation(x, label=None):
+    # Compute autocoreelation function for chain
+    lags = np.arange(0, 1000)
+    rho = autocorrelation(x, lags)
+    plt.plot(lags, rho, label=label)
+    plt.xlabel(r'lag $k$')
+    plt.ylabel(r'estimated autocorrelation $\rho(k)$')
+    plt.title('Correlation between every kth sample of MCMC chain')
+    plt.legend()
+    plt.show()
+    plt.close()
+
+
+def llr(i, x):
+    # Plot LLR as a function of step
+    plt.plot(i, x)
+    plt.xlabel('iteration')
+    plt.ylabel('posterior value')
+    plt.yscale('log')
+    plt.show()
+    plt.close()
+    return
+
+
+def plot_parameter_grid(first, second=None, third=None, fourth=None):
+    fig = plt.figure(figsize=(9,9))
+    grid = plt.GridSpec(4, 4)
+
+    # LEFT-MOST ROW
+    # Histogram of first parameter
+    f = plt.subplot(grid[0, 0])
+    h = f.hist(first, bins=30, histtype='step')
+    plt.vlines(np.median(first), 0, np.max(h[0]), linestyle='--', color='red')
+    plt.ylabel('coll z1')
+    # Scatter plot of first parameter and second parameter
+    f_corr = plt.subplot(grid[1, 0])
+    f_corr.scatter(first, second, s=2)
+    plt.ylabel('coll z2')
+    # Scatter plot of first parameter and third parameter
+    f_sec_corr = plt.subplot(grid[2, 0])
+    f_sec_corr.scatter(first, third, s=2)
+    plt.ylabel('coll z*')
+    # Scatter plot of first parameter and fourth parameter
+    f_thi_corr = plt.subplot(grid[3, 0])
+    f_thi_corr.scatter(first, fourth, s=2)
+    plt.ylabel('coll rho0')
+    plt.xlabel('coll z1')
+
+    # MIDDLE ROW
+    # Histogram of second parameter
+    s = plt.subplot(grid[1, 1])
+    h = s.hist(second, bins=20, histtype='step')
+    plt.vlines(np.median(second), 0, np.max(h[0]), linestyle='--', color='red')
+    # Scatter plot of second parameter and third
+    second_corr = plt.subplot(grid[2, 1])
+    second_corr.scatter(second, third, s=2)
+    #plt.yticks([])
+    plt.xlabel('coll z2')
+
+    # Third row
+    t = plt.subplot(grid[2, 2])
+    h = t.hist(third, bins=20, histtype='step')
+    plt.vlines(np.median(third), 0, np.max(h[0]), linestyle='--', color='red')
+    #plt.yticks([])
+    plt.xlabel('coll z*')
+
+    # Finish
+    plt.tight_layout()
+    plt.show()
+    plt.close()
+
 
 
 # Read file
@@ -171,8 +243,6 @@ def plot_results(filename):
         1: "coll_z2",
         2: "coll_z*",
     }
-
-    # z1, z2, z*, LLR, i
     i = np.arange(1, len(results))
     z1 = results[:,0][1:]
     z2 = results[:,1][1:]
@@ -181,18 +251,6 @@ def plot_results(filename):
     accepted = results[:,7][1:]
     effective_step = results[:,8][1:]
     acceptance_ratio = accepted / effective_step
-
-    # Compute autocoreelation function for chain
-    lags = np.arange(0, 1000)
-    for j in range(3):
-        rho = autocorrelation(results[:,j][1:], lags)
-        plt.plot(lags, rho, label=parameters[j])
-    plt.xlabel(r'lag $k$')
-    plt.ylabel(r'estimated autocorrelation $\rho(k)$')
-    plt.title('Correlation between every kth sample of MCMC chain')
-    plt.legend()
-    plt.show()
-    plt.close()
     '''
     # Plot "running mean plots"
     # calculate the mean as a function of iteration
@@ -212,51 +270,6 @@ def plot_results(filename):
     plt.show()
     plt.close()
     '''
-    # Plot parameters
-    grid = plt.GridSpec(3, 3)
-    # First row
-    first = plt.subplot(grid[0, 0])
-    h = first.hist(z1, bins=20, histtype='step', density=True)
-    plt.vlines(np.median(z1[::3]), 0, np.max(h[0]), linestyle='--', color='red')
-    plt.xticks([])
-    plt.yticks([])
-    plt.ylabel('z1')
-    first_corr = plt.subplot(grid[1, 0])
-    first_corr.scatter(z1[::3], z2[::3], s=2)
-    plt.xticks([])
-    plt.ylabel('z2')
-    first_sec_corr = plt.subplot(grid[2, 0])
-    first_sec_corr.scatter(z1[::3], zstart[::3], s=2)
-    plt.ylabel('z*')
-    plt.xlabel('z1')
-
-    # Second row
-    second = plt.subplot(grid[1, 1])
-    h = second.hist(z2[1::3], bins=20, histtype='step', density=True)
-    plt.vlines(np.median(z2[1::3]), 0, np.max(h[0]), linestyle='--', color='red')
-    plt.xticks([])
-    plt.yticks([])
-    second_corr = plt.subplot(grid[2, 1])
-    second_corr.scatter(z2[1::3], zstart[1::3], s=2)
-    plt.yticks([])
-    plt.xlabel('z2')
-
-    # Third row
-    third = plt.subplot(grid[2, 2])
-    h = third.hist(zstart, bins=20, histtype='step', density=True)
-    plt.vlines(np.median(zstart[2::3]), 0, np.max(h[0]), linestyle='--', color='red')
-    plt.yticks([])
-    plt.xlabel('z*')
-    plt.tight_layout()
-    plt.show()
-    plt.close()
-
-    # Plot LLR
-    plt.plot(i, LLR)
-    plt.xlabel('iteration')
-    plt.ylabel('log-likelihood')
-    plt.show()
-    plt.close()
     return
 
 def track_acceptance(file):
@@ -264,6 +277,12 @@ def track_acceptance(file):
     accepted = results[:,7][1:]
     effective_step = results[:,8][1:]
     return accepted / effective_step
+
+
+
+
+
+
 
 
 '''
@@ -294,9 +313,6 @@ plt.legend()
 #plt.show()
 plt.close()
 '''
-
-
-
 
 '''
 if options.getboolean('testing') is not False:
