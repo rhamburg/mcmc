@@ -17,6 +17,7 @@ parser.add_argument('-i', '--iter', help='Number of MCMC iterations to make', ty
 parser.add_argument('-p', '--plotGRB', help='Boolean for plotting peak flux info')
 parser.add_argument('-n', '--num_param', help='Number of parmeters to search')
 parser.add_argument('-c', '--config', help='Path to config file to initialize parameters')
+parser.add_argument('-P', '--prior', help='Boolean to determine if just sampling priors and not posterior')
 args = parser.parse_args()
 
 
@@ -36,7 +37,10 @@ if args.config is not None:
     config_file = args.config
 else:
     config_file = 'parameters.ini'
-
+if args.prior is None:
+    args.prior = False
+else:
+    print ('TESTING PRIOR DISTRIBUTIONS...')
 
 config = ConfigParser()
 config.read(config_file)
@@ -55,7 +59,6 @@ print ('Reading data file...')
 obs_pf = read_data()
 
 # Luminosity info
-print ('IS NSIM HIGH ENOUGH?')
 NSIM = iterations.getint('NSIM')
 min_lum = luminosity.getfloat('coll_min_lum')
 max_lum = luminosity.getfloat('coll_max_lum')
@@ -113,13 +116,13 @@ parameter_dict = {
     "merg alpha": 10,
     "merg beta": 11,
     "posterior": 12,
-    "acceptance ratio": 13,
+    "acceptance num": 13,
     "effective step": 14,
     }
 
 # some easy index definitions used in MCMC loop
 post_idx = parameter_dict["posterior"]
-p_accept_idx = parameter_dict["acceptance ratio"]
+p_accept_idx = parameter_dict["acceptance num"]
 eff_step_idx = parameter_dict["effective step"]
 
 # Set up parameter space to record MCMC inputs
@@ -170,7 +173,6 @@ for i in range(0, args.iter+1):
         # Update parameter_space[i] with random proposed value
         parameter_space[i][pdx] = proposal_distribution(keyword[0],
             current_value)
-        print (current_value, parameter_space[i][pdx])
 
     # If parameter is out of prior bounds, do not calculate likelihood.
     # Set posterior equal to the proposal (i.e., -inf).
@@ -180,10 +182,11 @@ for i in range(0, args.iter+1):
     if np.isinf(parameter_space[i][pdx]) == True:
         parameter_space[i][post_idx] = parameter_space[i][pdx]
     else:
-        parameter_space[i][post_idx] = Simulation(parameter_space[i], parameter_dict,
-            num_param, detector=detector,
+        parameter_space[i][post_idx] = Simulation(parameter_space[i],
+            parameter_dict, num_param, detector=detector,
             redshifts=redshifts, luminosities=luminosities, obs_pf=obs_pf,
-            dl=dl, options=options, vol_arr=v_comov, kc=kcorr, plot_GRB=plot)
+            dl=dl, options=options, vol_arr=v_comov, kc=kcorr, plot_GRB=plot,
+            prior=args.prior)
 
     if i > 0:
         # Previous parameter_space entry with parameter pdx
@@ -194,8 +197,8 @@ for i in range(0, args.iter+1):
         # (probably more efficient if only change if parameter is accepted,
         # but doesn't work with my code right now)
 
-        # Give proposed parameter, LL with proposed parameter, previous parameter
-        # acceptance ratio, and total acceptance ratio
+        # Give proposed parameter, LL with proposed parameter, previous
+        # parameter acceptance ratio, and total acceptance ratio
         parameter_space[i][pdx], parameter_space[i][post_idx], \
         parameter_space[i][p_accept_idx], total_accept = \
             metro_hastings(current_param=parameter_space[i-1][pdx],

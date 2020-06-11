@@ -70,6 +70,38 @@ def proposal_distribution(parameter, x, tuning=1):
             return -np.inf
         else:
             return n
-    
+
+    elif parameter == 'coll alpha':
+        # Low luminosity index for collapsars
+        n = np.random.normal(x, tuning)
+        if inbounds(n, parameter) is not True:
+            return -np.inf
+        else:
+            return n
+
+    elif parameter == 'coll beta':
+        # High luminosity index for mergers
+        n = np.random.normal(x, tuning)
+        if inbounds(n, parameter) is not True:
+            return -np.inf
+        else:
+            return n
+
+    elif parameter == 'merg alpha':
+        # Low luminosity index for mergers
+        n = np.random.normal(x, tuning)
+        if inbounds(n, parameter) is not True:
+            return -np.inf
+        else:
+            return n
+
+    elif parameter == 'merg beta':
+        # High luminosity index for mergers
+        n = np.random.normal(x, tuning)
+        if inbounds(n, parameter) is not True:
+            return -np.inf
+        else:
+            return n
+
     else:
         print ('parameter not found')
