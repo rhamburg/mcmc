@@ -32,7 +32,7 @@ def check(x, a, b):
     ----------
     True/False - determined by whether or not x is within [a, b]
     """
-    if x > a and x < b:
+    if x > a and x <= b:
         return True
     else:
         return False
