@@ -7,7 +7,15 @@ import time
 
 def Simulation(ps, par_dict, num_param, redshifts=None, luminosities=None,
 obs_pf=None, detector=None, options=None, vol_arr=None, kc=None, dl=None,
-plot_GRB=None):
+plot_GRB=None, prior=False):
+
+    # Option for prior testing
+    if prior is not False:
+        ln_prior = 0
+        for n in range(num_param):
+            keyword = [x for x,y in par_dict.items() if y==n]
+            ln_prior += np.log(prior_dist(ps[n], keyword[0]))
+        return ln_prior
 
     # Plotting options
     if plot_GRB is None:
@@ -107,24 +115,23 @@ plot_GRB=None):
         z=redshift_sample_merg, kcorr=merg_kc, dl=merg_dl,
         emin=detector.getfloat('nai_emin'),
         emax=detector.getfloat('nai_emax'), plotting=plot_GRB)
-    
+
     # Combine collapsar and merger model counts
     model, data = combine_data(coll_model=coll_pf, merg_model=merg_pf,
         data=obs_pf, coll_all=coll_pf_all, merg_all=merg_pf_all,
         coll_model_label='Collapsar Model', merg_model_label='Merger Model',
         data_label='GBM Data', show_plot=plot_GRB)
-    
+
     # Calculate the likelihood for this model (i.e., these parameters)
     try:
         llr = log_likelihood(model_counts=model, data_counts=data)
-        
+
         # set uniform priors for right now
         ln_prior = 0
         for n in range(num_param):
             keyword = [x for x,y in par_dict.items() if y==n]
             ln_prior += np.log(prior_dist(ps[n], keyword[0]))
         return llr+ln_prior
-        
+
     except:
         return -np.inf
-

@@ -107,9 +107,9 @@ def k_correction(z, emin=10, emax=1000):
 # Luminosity function
 def luminosity_function(l, lum_star=1E52, alpha=0.2, beta=1.4, phi_0=1.):
     if l < lum_star:
-        index = -(alpha)
+        index = alpha
     else:
-        index = -(beta)
+        index = beta
     phi = phi_0 * (l/lum_star)**index
     return phi
 

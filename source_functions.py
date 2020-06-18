@@ -176,7 +176,7 @@ dl=None, plotting=False):
         return corr_pf, final_pf
     else:
         return [], []
- 
+
 
 """
 Detector threshold
@@ -199,12 +199,12 @@ def log_likelihood(model_counts, data_counts):
     # Calculate the log likelihood
     # When calculating Poisson probability, we ignore the factorial term because
     # it's model independent
-    
+
     Parameters:
     -----------
     model_counts: normalized or unnormalized counts for model
     data_counts: normalized or unnormalized counts for data
-    
+
     Returns:
     -----------
     LLR - float; log likelihood calculated from model counts and data counts
@@ -221,7 +221,7 @@ merg_all=None, show_plot=False, coll_model_label=None, merg_model_label=None,
 data_label=None):
     """
     Combine data to prepare for LLR calculation
-    
+
     Parameters:
     ------------
     coll_model - array or list of "detected" peak fluxes from model GRBs from collapsars
@@ -232,7 +232,7 @@ data_label=None):
     coll_model_label -
     merg_model_label -
     data_label -
-    
+
     Returns:
     ------------
     model_counts - list of GRBs in each collapsar+merger peak flux histogram bin
@@ -255,7 +255,7 @@ def metro_hastings(current_post=None, proposed_post=None, current_param=None,
 p_accept=None, total_accept=None, proposed_param=None):
     rand_num = np.random.uniform(0,1)
     H = np.minimum(1, proposed_post / current_post)
-    if H >= rand_num:
+    if H >= rand_num and np.isinf(proposed_post)==False:
         # accept candidate
         # update acceptance ratios
         #print('accept')
