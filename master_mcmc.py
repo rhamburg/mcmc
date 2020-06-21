@@ -48,6 +48,7 @@ iterations = config['iterations']
 detector = config['detector']
 luminosity = config['luminosity']
 redshift = config['redshift']
+duration = config['duration']
 options = config['options']
 
 
@@ -115,9 +116,13 @@ parameter_dict = {
     "coll beta":  9,
     "merg alpha": 10,
     "merg beta": 11,
-    "posterior": 12,
-    "acceptance num": 13,
-    "effective step": 14,
+    "coll mu": 12,
+    "coll sigma": 13,
+    "merg mu": 14,
+    "merg sigma": 15,
+    "posterior": 16,
+    "acceptance num": 17,
+    "effective step": 18,
     }
 
 # some easy index definitions used in MCMC loop
@@ -139,7 +144,11 @@ parameter_space[0] = [redshift.getfloat('coll_n1'),
                         luminosity.getfloat('coll_alpha'),
                         luminosity.getfloat('coll_beta'),
                         luminosity.getfloat('merg_alpha'),
-                        luminosity.getfloat('merg_beta'), 1., 0., 0]
+                        luminosity.getfloat('merg_beta'),
+                        duration.getfloat('coll_mu'),
+                        duration.getfloat('coll_sigma'),
+                        duration.getfloat('merg_mu'),
+                        duration.getfloat('merg_sigma'), 1., 0., 0]
 
 '''
 # Loop through each tuning parameter
@@ -183,7 +192,7 @@ for i in range(0, args.iter+1):
         parameter_space[i][post_idx] = parameter_space[i][pdx]
     else:
         parameter_space[i][post_idx] = Simulation(parameter_space[i],
-            parameter_dict, num_param, detector=detector,
+            parameter_dict, num_param, detector=detector, duration=duration,
             redshifts=redshifts, luminosities=luminosities, obs_pf=obs_pf,
             dl=dl, options=options, vol_arr=v_comov, kc=kcorr, plot_GRB=plot,
             prior=args.prior)
@@ -226,7 +235,8 @@ for i in range(0, args.iter+1):
 print (parameter_space[i])
 
 print("--- Runtime of %s seconds ---\n" % (time.time() - sim_time))
-print ('Acception fraction:', total_accept/(args.iter))
+if args.iter > 0:
+    print ('Acception fraction:', total_accept/(args.iter))
 
 
 # Save file of parameters, LLRs, and diagnostics

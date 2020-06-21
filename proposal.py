@@ -5,6 +5,14 @@ from prior import *
 Pick new parameter
 """
 def proposal_distribution(parameter, x, tuning=1):
+    n = np.random.normal(x, tuning)
+    if inbounds(n, parameter) is not True:
+        # keep parameter at current value
+        return -np.inf
+    else:
+        # return new value
+        return n
+'''
     if parameter == 'coll z1':
         # Low redshift index for Collapsars
         n = np.random.normal(x, tuning)
@@ -103,5 +111,38 @@ def proposal_distribution(parameter, x, tuning=1):
         else:
             return n
 
+    elif parameter == 'coll mu':
+        # Mean for collapsar duration distribution
+        n = np.random.normal(x, tuning)
+        if inbounds(n, parameter) is not True:
+            return -np.inf
+        else:
+            return n
+                
+    elif parameter == 'merg beta':
+        # Deviation from mean of collapsar duration distribution
+        n = np.random.normal(x, tuning)
+        if inbounds(n, parameter) is not True:
+            return -np.inf
+        else:
+            return n
+            
+    elif parameter == 'merg beta':
+        # High luminosity index for mergers
+        n = np.random.normal(x, tuning)
+        if inbounds(n, parameter) is not True:
+            return -np.inf
+        else:
+            return n
+            
+    elif parameter == 'merg beta':
+        # High luminosity index for mergers
+        n = np.random.normal(x, tuning)
+        if inbounds(n, parameter) is not True:
+            return -np.inf
+        else:
+            return n
+                    
     else:
         print ('parameter not found')
+'''

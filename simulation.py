@@ -6,8 +6,8 @@ from plot import plot_samples
 import time
 
 def Simulation(ps, par_dict, num_param, redshifts=None, luminosities=None,
-obs_pf=None, detector=None, options=None, vol_arr=None, kc=None, dl=None,
-plot_GRB=None, prior=False):
+duration=None, obs_pf=None, detector=None, options=None, vol_arr=None, kc=None,
+dl=None, plot_GRB=None, prior=False):
 
     # Option for prior testing
     if prior is not False:
