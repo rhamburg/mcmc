@@ -144,7 +144,12 @@ vol_arr=None, plot=False):
     rate_pdf = rate / N_tot[0]
     # Plot 'observed' redshift distribution
     if plot is not False:
-        plot_rate(redshifts, rate)
+        int_rate = [int_grb_rate(z, z_star=z_star, n1=n1, n2=n2, r_0=rho0) \
+            for z in redshifts]
+        plot_rate(redshifts, int_rate, title='Intrinsic GRB Rate',
+            ylabel=r'$R_{GRB;int}$ [$Gpc^{-1} yr^{-1}$]')
+        plot_rate(redshifts, rate, ylabel=r'$R_{GRB;obs}$ [$dz^{-1} yr^{-1}$]',
+            title='Obs GRB Rate')
     return rate_pdf, N_tot[0]
 
 
