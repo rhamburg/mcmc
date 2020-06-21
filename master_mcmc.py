@@ -56,7 +56,7 @@ print ('\nGRB Peak Flux Simulator\n')
 
 # Read GBM data [peak flux 10-1000 keV]
 print ('Reading data file...')
-obs_pf = read_data()
+obs_pf, obs_t90 = read_data()
 
 # Luminosity info
 NSIM = iterations.getint('NSIM')

@@ -11,25 +11,28 @@ import matplotlib
 from plot import *
 import time
 
-"""
-# GBM's peak flux distributions
-# I'm going to use long bursts first. But what about using all bursts and
-# trying to distinguish 2 populations from them...
-Parameters:
------------
-"""
+
 def read_data(type='all'):
+    """
+    # GBM's peak flux and duration (t90) distributions
+    
+    Parameters:
+    ------------
+    type: string of 'long', 'short', or 'all'
+    
+    Returns:
+    ------------
+    peak fluxes, durations lists
+    """
     file = ascii.read("gbm_bursts_t90_flux.txt", data_start=1)
-    #print (file)
     if type == 'long':
-        peak_flux_long = file[np.where(file["col3"]>2.)]
-        return peak_flux_long["col5"]
+        long_GRBs = file[np.where(file["col3"]>2.)]
+        return long_GRBs["col5"], long_GRBs["col3"]
     elif type == 'short':
-        peak_flux_long = file[np.where(file["col3"]<2.)]
-        return peak_flux_long["col5"]
+        short_GRBs = file[np.where(file["col3"]<2.)]
+        return peak_flux_long["col5"], short_GRBs["col3"]
     else:
-        #print (file["col5"])
-        return file["col5"]
+        return file["col5"], file["col3"]
 
 """
 # Find cdf interval j such that the random number is in that interval
