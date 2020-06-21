@@ -30,14 +30,12 @@ def plot_samples(x, pdfx, pdfy, xlog=False, ylog=False, xlabel=None, ylabel=None
     plt.close()
     return
 
-def plot_rate(redshifts, rate):
-    fig = plt.figure(constrained_layout=True)
-    grid = plt.GridSpec(1, 4, figure=fig)
-    first = plt.subplot(grid[0, :2])
-    first.plot(redshifts, rate)
+def plot_rate(redshifts, rate, ylabel=None, title=None):
+    plt.plot(redshifts, rate)
     plt.xlabel('Redshift')
-    plt.ylabel(r'$R_{GRB;obs}$ [$Gpc^{-1} yr^{-1}$]')
-    plt.title('Obs GRB Rate')
+    plt.ylabel(ylabel)
+    plt.title(title)
+    
     '''
     # Intrinsic comoving grb rate [$Gpc^{-3} yr^{-1}$]
     sum = quad(int_grb_rate, redshifts[0], redshifts[-1], args=(z_star, n1, n2, rho0))
@@ -187,103 +185,37 @@ def llr(i, x):
     return
 
 
-def plot_parameter_grid(first, second=None, third=None, fourth=None):
+def plot_grid_general(parameters, labels, numbins=20, dot_size=1):
+    rows = len(parameters)
+    columns = len(parameters)
     fig = plt.figure(figsize=(9,9))
-    grid = plt.GridSpec(4, 4)
-    dot_size = 4
-    numbins = 20
-
-    ## FIRST ROW
-    # Histogram of first parameter
-    f = plt.subplot(grid[0, 0])
-    h = f.hist(first, bins=numbins, histtype='step')
-    plt.vlines(np.median(first), 0, np.max(h[0]), linestyle='--', color='red')
-    plt.ylabel('coll z1')
-    # Scatter plot of first parameter and second parameter
-    f_corr = plt.subplot(grid[1, 0])
-    f_corr.scatter(first, second, s=dot_size)
-    plt.ylabel('coll z2')
-    # Scatter plot of first parameter and third parameter
-    f_sec_corr = plt.subplot(grid[2, 0])
-    f_sec_corr.scatter(first, third, s=dot_size)
-    plt.ylabel('coll z*')
-    # Scatter plot of first parameter and fourth parameter
-    f_thi_corr = plt.subplot(grid[3, 0])
-    f_thi_corr.scatter(first, fourth, s=dot_size)
-    plt.xlabel('coll z1')
-
-    ## SECOND ROW
-    # Histogram of second parameter
-    s = plt.subplot(grid[1, 1])
-    h = s.hist(second, bins=numbins, histtype='step')
-    plt.vlines(np.median(second), 0, np.max(h[0]), linestyle='--', color='red')
-    # Scatter plot of second parameter and third
-    s_corr = plt.subplot(grid[2, 1])
-    s_corr.scatter(second, third, s=dot_size)
-    # Scatter plot of second parameter and fourth parameter
-    s_sec_corr = plt.subplot(grid[3, 1])
-    s_sec_corr.scatter(second, fourth, s=dot_size)
-    plt.xlabel('coll z2')
-
-    ## THIRD ROW
-    t = plt.subplot(grid[2, 2])
-    h = t.hist(third, bins=numbins, histtype='step')
-    plt.vlines(np.median(third), 0, np.max(h[0]), linestyle='--', color='red')
-    # Scatter plot of third parameter and fourth
-    t_corr = plt.subplot(grid[3, 2])
-    t_corr.scatter(third, fourth, s=dot_size)
-    plt.xlabel('coll z*')
-    plt.ylabel('coll rho0')
-
-    # FOURTH ROW
-    f2 = plt.subplot(grid[3, 3])
-    h = f2.hist(fourth, bins=numbins, histtype='step')
-    plt.vlines(np.median(fourth), 0, np.max(h[0]), linestyle='--', color='red')
-    plt.xlabel('coll rho0')
-
+    grid = plt.GridSpec(rows, columns)
+    
+    # Plot first column
+    for j in range(columns):
+        for i in range(j, rows):
+            plt.subplot(grid[i, j])
+            
+            # Make histogram of parameter
+            if i == j:
+                h = plt.hist(parameters[i], bins=numbins, histtype='step')
+                plt.vlines(np.median(parameters[i]), 0, np.max(h[0]), linestyle='--', color='red')
+            # Make scatter plots of parameters
+            else:
+                plt.scatter(parameters[j], parameters[i], s=dot_size)
+            
+            # Add plot labels
+            if j == 0:
+                plt.ylabel(labels[i])
+            if i == (rows-1):
+                plt.xlabel(labels[j])
+            
     # Finish
     plt.tight_layout()
     plt.show()
     plt.close()
 
 
-
-# Read file
-def plot_results(filename):
-    results = np.load(filename)
-    parameters = {
-        0: "coll_z1",
-        1: "coll_z2",
-        2: "coll_z*",
-    }
-    i = np.arange(1, len(results))
-    z1 = results[:,0][1:]
-    z2 = results[:,1][1:]
-    zstart = results[:,2][1:]
-    LLR = results[:,6][1:]
-    accepted = results[:,7][1:]
-    effective_step = results[:,8][1:]
-    acceptance_ratio = accepted / effective_step
-    '''
-    # Plot "running mean plots"
-    # calculate the mean as a function of iteration
-    print ('check running mean plot')
-    summed =  np.cumsum(z1)
-    run_mean = [summed[i]/float(i+1) for i in range(len(summed))]
-    plt.plot(i, run_mean, label='z1')
-    summed =  np.cumsum(z2)
-    run_mean = [summed[i]/float(i+1) for i in range(len(summed))]
-    plt.plot(i, run_mean, label='z2')
-    summed =  np.cumsum(zstart)
-    run_mean = [summed[i]/float(i+1) for i in range(len(summed))]
-    plt.plot(i, run_mean, label='z*')
-    plt.legend()
-    plt.xlabel('iteration')
-    plt.title('Running Mean Plot')
-    plt.show()
-    plt.close()
-    '''
-    return
 
 def track_acceptance(file):
     results = np.load(file)
