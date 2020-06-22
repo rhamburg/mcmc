@@ -59,8 +59,11 @@ print ('\nGRB Peak Flux Simulator\n')
 print ('Reading data file...')
 obs_pf, obs_t90 = read_data()
 
-# Luminosity info
+# Durations
 NSIM = iterations.getint('NSIM')
+durations = np.logspace(-3, 3, NSIM)
+
+# Luminosity info
 min_lum = luminosity.getfloat('coll_min_lum')
 max_lum = luminosity.getfloat('coll_max_lum')
 luminosities = np.logspace(min_lum, max_lum, NSIM)
@@ -182,7 +185,7 @@ for i in range(0, args.iter+1):
         # Update parameter_space[i] with random proposed value
         parameter_space[i][pdx] = proposal_distribution(keyword[0],
             current_value)
-
+        #print (keyword,parameter_space[i][pdx])
     # If parameter is out of prior bounds, do not calculate likelihood.
     # Set posterior equal to the proposal (i.e., -inf).
     # If parameter is within prior bounds, calculate posterior from peak flux.
@@ -192,7 +195,7 @@ for i in range(0, args.iter+1):
         parameter_space[i][post_idx] = parameter_space[i][pdx]
     else:
         parameter_space[i][post_idx] = Simulation(parameter_space[i],
-            parameter_dict, num_param, detector=detector, duration=duration,
+            parameter_dict, num_param, detector=detector, durations=durations,
             redshifts=redshifts, luminosities=luminosities, obs_pf=obs_pf,
             dl=dl, options=options, vol_arr=v_comov, kc=kcorr, plot_GRB=plot,
             prior=args.prior)

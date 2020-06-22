@@ -112,7 +112,7 @@ xlog=False, ylog=False):
     random_xs = draw_samples(xs, cdf_normed, num_draw=num_draw)
     if plot is not False:
         plot_cdf(xs, cdf_normed, xlabel, xlog, ylog)
-    return random_xs, cdf_normed
+    return random_xs#, cdf_normed
 
 
 def source_rate_density(redshifts, rho0=1., z_star=1., n1=1., n2=1.,
@@ -154,6 +154,18 @@ vol_arr=None, plot=False):
         plot_rate(redshifts, rate, ylabel=r'$R_{GRB;obs}$ [$dz^{-1} yr^{-1}$]',
             title='Obs GRB Rate')
     return rate_pdf, N_tot[0]
+
+
+def intrinsic_duration(durations, mu=1, sigma=1, plot=False):
+    '''
+    T90 is usually calculated from fluence between 50-300 keV. We might have to
+    modify our comparisons because I'm taking flux between 10-1000 keV (maybe
+    higher.
+    '''
+    t90_freq = log_normal(durations, mu=mu, sigma=sigma, A=1.)
+    if plot is not False:
+        plot_duration(durations, t90_freq)
+    return t90_freq
 
 
 """
@@ -272,6 +284,7 @@ p_accept=None, total_accept=None, proposed_param=None):
         return proposed_param, proposed_post, p_accept, total_accept
     else:
         # reject candidate
+        #print ('reject')
         # return to previous parameter value and posterior
         return current_param, current_post, p_accept, total_accept
 
