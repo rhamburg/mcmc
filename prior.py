@@ -5,17 +5,21 @@ import numpy as np
 collz1 = [0,5]
 collz2 = [-5,0]
 collzpeak = [0,10]
-collrho0 = [0,10]
+collrho0 = [0.01,10]
 mergz1 = [0,5]
 mergz2 = [-5,0]
 mergzpeak = [0,10]
-mergrho0 = [0,10]
-coll_alpha = [-5, 1e-12]
-coll_beta = [-5, 1e-12]
-merg_alpha = [-5, 1e-12]
-merg_beta = [-5, 1e-12]
-coll_lpeak = [1e49, 1e54]
-merg_lpeak = [1e49, 1e54]
+mergrho0 = [0.01, 10]
+coll_alpha = [-5, 0]
+coll_beta = [-5, 0]
+merg_alpha = [-5, 0]
+merg_beta = [-5, 0]
+coll_mu = [1e-2, 100]
+coll_sigma = [0, 10]
+merg_mu = [1e-3, 10]
+merg_sigma = [0, 10]
+#coll_lpeak = [1e49, 1e54]
+#merg_lpeak = [1e49, 1e54]
 
 
 def check(x, a, b):
@@ -88,8 +92,18 @@ def inbounds(n, parameter):
         return check(n, merg_alpha[0], merg_alpha[1])
     elif parameter == 'merg beta':
         return check(n, merg_beta[0], merg_beta[1])
+    # Collapsar duration
+    elif parameter == 'coll mu':
+        return check(n, coll_mu[0], coll_mu[1])
+    elif parameter == 'coll sigma':
+        return (check(n, coll_sigma[0], coll_sigma[1]))
+    # Merger duration
+    elif parameter == 'merg mu':
+        return (check(n, merg_mu[0], merg_mu[1]))
+    elif parameter == 'merg sigma':
+        return (check(n, merg_sigma[0], merg_mu[1]))
     else:
-        print ('parameter was not found')
+        print ('parameter was not found; inbounds')
 
 
 def prior_dist(n, parameter, type='uniform'):
@@ -114,7 +128,7 @@ def prior_dist(n, parameter, type='uniform'):
     elif parameter == 'coll z*':
         return probability(n, a=collzpeak[0], b=collzpeak[1])
     elif parameter == 'coll rho0':
-        return probability(n, a=collrho0[0], b=collrho0[1])
+        return probability(n, a=collrho0[0], b=collrho0[1], type='log uniform')
     # Merger redshift
     elif parameter == 'merg z1':
         return probability(n, a=mergz1[0], b=mergz1[1])
@@ -123,16 +137,26 @@ def prior_dist(n, parameter, type='uniform'):
     elif parameter == 'merg z*':
         return probability(n, a=mergzpeak[0], b=mergzpeak[1])
     elif parameter == 'merg rho0':
-        return probability(n, a=mergrho0[0], b=mergrho0[1])
+        return probability(n, a=mergrho0[0], b=mergrho0[1], type='log uniform')
     # Collapsar luminosity
     elif parameter == 'coll alpha':
-        return probability(n, a=coll_alpha[0], b=coll_alpha[1])#, type='log uniform')
+        return probability(n, a=coll_alpha[0], b=coll_alpha[1])
     elif parameter == 'coll beta':
-        return probability(n, a=coll_beta[0], b=coll_beta[1])#, type='log uniform')
+        return probability(n, a=coll_beta[0], b=coll_beta[1])
     # Merger luminosity
     elif parameter == 'merg alpha':
-        return probability(n, a=merg_alpha[0], b=merg_alpha[1])#, type='log uniform')
+        return probability(n, a=merg_alpha[0], b=merg_alpha[1])
     elif parameter == 'merg beta':
-        return probability(n, a=merg_beta[0], b=merg_beta[1])#, type='log uniform')
+        return probability(n, a=merg_beta[0], b=merg_beta[1])
+    # Collapsar duration
+    elif parameter == 'coll mu':
+        return probability(n, a=coll_mu[0], b=coll_sigma[1], type='log uniform')
+    elif parameter == 'coll sigma':
+        return probability(n, a=coll_sigma[0], b=coll_sigma[1])
+    # Merger duration
+    elif parameter == 'merg mu':
+        return probability(n, a=merg_mu[0], b=merg_mu[1], type='log uniform')
+    elif parameter == 'merg sigma':
+        return probability(n, a=merg_sigma[0], b=merg_sigma[1])
     else:
-        print ('parameter was not found')
+        print ('parameter was not found; prior_dist')

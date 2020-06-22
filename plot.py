@@ -6,19 +6,19 @@ from math_functions import autocorrelation
 
 def plot_samples(x, pdfx, pdfy, xlog=False, ylog=False, xlabel=None, ylabel=None):
     if xlog is not False:
-        pdfy = np.array(pdfy)
-        pdfy = pdfy / pdfy[0]
-        plt.plot(pdfx, pdfy, label='pdf', color='red')
-
         plt.xscale('log')
-        bins = np.logspace(50, 54, 30)
-        yvals, histbins = np.histogram(x, bins=bins)
-        bindiff = np.diff(histbins)
-        print (np.diff(histbins))
-        print (np.diff(np.log10(histbins)))
-        newy = yvals / yvals[0]
+        bins = np.logspace(-3, 3, 60)
+        h = np.histogram(x, bins=bins)
+        yvals = h[0] / np.max(h[0])
+        plt.step(bins[:-1], yvals)
+        
+        #yvals, histbins = np.histogram(x, bins=bins)
+        #bindiff = np.diff(histbins)
+        #print (np.diff(histbins))
+        #print (np.diff(np.log10(histbins)))
+        #newy = yvals / yvals[0]
         #newy = yvals / (len(x) * np.diff(histbins))
-        plt.bar(histbins[:-1], newy, width=bindiff, align='edge', edgecolor='C0', color='None', label='samples')
+        #plt.bar(histbins[:-1], newy, width=bindiff, align='edge', edgecolor='C0', color='None', label='samples')
     elif xlog is False:
         plt.hist(x, bins=30, histtype='step', density=True)
     if ylog is not False:
@@ -35,7 +35,6 @@ def plot_rate(redshifts, rate, ylabel=None, title=None):
     plt.xlabel('Redshift')
     plt.ylabel(ylabel)
     plt.title(title)
-    
     '''
     # Intrinsic comoving grb rate [$Gpc^{-3} yr^{-1}$]
     sum = quad(int_grb_rate, redshifts[0], redshifts[-1], args=(z_star, n1, n2, rho0))
@@ -144,6 +143,16 @@ def plot_obs_lum(final_l):
 # obs grb rate
 def plot_obs_rate(final_z):
     plt.hist(final_z, bins=30)
+    plt.show()
+    plt.close()
+    return
+
+
+# Duration distribution
+def plot_duration(x, y):
+    plt.xscale('log')
+    plt.plot(x,y)
+    plt.xlabel(r"$T_{90}$ [50-300 keV]")
     plt.show()
     plt.close()
     return

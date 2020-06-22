@@ -11,25 +11,28 @@ import matplotlib
 from plot import *
 import time
 
-"""
-# GBM's peak flux distributions
-# I'm going to use long bursts first. But what about using all bursts and
-# trying to distinguish 2 populations from them...
-Parameters:
------------
-"""
+
 def read_data(type='all'):
+    """
+    # GBM's peak flux and duration (t90) distributions
+    
+    Parameters:
+    ------------
+    type: string of 'long', 'short', or 'all'
+    
+    Returns:
+    ------------
+    peak fluxes, durations lists
+    """
     file = ascii.read("gbm_bursts_t90_flux.txt", data_start=1)
-    #print (file)
     if type == 'long':
-        peak_flux_long = file[np.where(file["col3"]>2.)]
-        return peak_flux_long["col5"]
+        long_GRBs = file[np.where(file["col3"]>2.)]
+        return long_GRBs["col5"], long_GRBs["col3"]
     elif type == 'short':
-        peak_flux_long = file[np.where(file["col3"]<2.)]
-        return peak_flux_long["col5"]
+        short_GRBs = file[np.where(file["col3"]<2.)]
+        return peak_flux_long["col5"], short_GRBs["col3"]
     else:
-        #print (file["col5"])
-        return file["col5"]
+        return file["col5"], file["col3"]
 
 """
 # Find cdf interval j such that the random number is in that interval
@@ -109,7 +112,7 @@ xlog=False, ylog=False):
     random_xs = draw_samples(xs, cdf_normed, num_draw=num_draw)
     if plot is not False:
         plot_cdf(xs, cdf_normed, xlabel, xlog, ylog)
-    return random_xs, cdf_normed
+    return random_xs#, cdf_normed
 
 
 def source_rate_density(redshifts, rho0=1., z_star=1., n1=1., n2=1.,
@@ -151,6 +154,18 @@ vol_arr=None, plot=False):
         plot_rate(redshifts, rate, ylabel=r'$R_{GRB;obs}$ [$dz^{-1} yr^{-1}$]',
             title='Obs GRB Rate')
     return rate_pdf, N_tot[0]
+
+
+def intrinsic_duration(durations, mu=1, sigma=1, plot=False):
+    '''
+    T90 is usually calculated from fluence between 50-300 keV. We might have to
+    modify our comparisons because I'm taking flux between 10-1000 keV (maybe
+    higher.
+    '''
+    t90_freq = log_normal(durations, mu=mu, sigma=sigma, A=1.)
+    if plot is not False:
+        plot_duration(durations, t90_freq)
+    return t90_freq
 
 
 """
@@ -269,6 +284,7 @@ p_accept=None, total_accept=None, proposed_param=None):
         return proposed_param, proposed_post, p_accept, total_accept
     else:
         # reject candidate
+        #print ('reject')
         # return to previous parameter value and posterior
         return current_param, current_post, p_accept, total_accept
 
