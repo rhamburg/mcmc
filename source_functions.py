@@ -162,6 +162,7 @@ def intrinsic_duration(durations, mu=1, sigma=1, plot=False):
     modify our comparisons because I'm taking flux between 10-1000 keV (maybe
     higher.
     '''
+    # Duration pdf (i.e., t90_freq should approx. sum to 1)
     t90_freq = log_normal(durations, mu=mu, sigma=sigma, A=1.)
     if plot is not False:
         plot_duration(durations, t90_freq)

@@ -94,16 +94,13 @@ dl=None, plot_GRB=None, prior=False):
         lum_pdf_merg, num_draw=N_merg,
         xlabel='Peak Luminosity (1-10,000 keV)[ergs/s]',
         xlog=True, ylog=False, plot=plot_func)
-    '''
-    I think this is ok, but I'm still super confused about the log(L)
-    and normalization.
+    
     # Plot randomly drawn samples and pdf to ensure sim is done correctly
-    #if plot_func is not False:
-    plot_samples(lum_sample_coll, luminosities, lum_pdf_coll, xlog=True,
-        ylog=True)
-    plot_samples(lum_sample_merg, luminosities, lum_pdf_merg, xlog=True,
-        ylog=True)
-    '''
+    if plot_func is not False:
+        bins = np.logspace(50, 54, 60)
+        plot_samples(lum_sample_coll, luminosities, lum_pdf_coll, bins=bins, xlog=True, ylog=True)
+        plot_samples(lum_sample_merg, luminosities, lum_pdf_merg, bins=bins, xlog=True, ylog=True)
+    
     
     ## Duration
     # Collapsar duration pdf
@@ -113,12 +110,11 @@ dl=None, plot_GRB=None, prior=False):
     merg_dur_pdf = intrinsic_duration(durations, mu=ps[par_dict["merg mu"]], sigma=ps[par_dict["merg sigma"]], plot=plot_func)
     dur_sample_merg = sample_distribution(durations, merg_dur_pdf, plot=plot_func, num_draw=N_merg)
     
-    '''
-    HELP!!! THIS IS NOT RIGHT!!!
     # Plot randomly drawn samples and pdf to ensure sim is done correctly
     if plot_func is not False:
-        plot_samples(dur_sample_coll, durations, coll_dur_pdf, xlog=True)
-    '''
+        bins = np.logspace(-3, 3, 60)
+        plot_samples(dur_sample_coll, durations, coll_dur_pdf, bins=bins, xlog=True)
+    
 
     ## Peak flux
     # Get model peak flux for simulated collapsar GRBs
@@ -133,21 +129,22 @@ dl=None, plot_GRB=None, prior=False):
         emax=detector.getfloat('nai_emax'), plotting=plot_GRB)
 
     # Combine collapsar and merger model counts
-    model, data = combine_data(coll_model=coll_pf, merg_model=merg_pf,
+    pf_model, pf_data = combine_data(coll_model=coll_pf, merg_model=merg_pf,
         data=obs_pf, coll_all=coll_pf_all, merg_all=merg_pf_all,
         coll_model_label='Collapsar Model', merg_model_label='Merger Model',
         data_label='GBM Data', show_plot=plot_GRB)
 
     # Calculate the likelihood for this model (i.e., these parameters)
     try:
-        llr = log_likelihood(model_counts=model, data_counts=data)
+        pf_llr = log_likelihood(model_counts=pf_model, data_counts=pf_data)
+        #dur_llr = log_likelihood(model_counts=dur_model, data_counts=durdata)
 
         # set uniform priors for right now
         ln_prior = 0
         for n in range(num_param):
             keyword = [x for x,y in par_dict.items() if y==n]
             ln_prior += np.log(prior_dist(ps[n], keyword[0]))
-        return llr+ln_prior
+        return pf_llr+ln_prior
 
     except:
         return -np.inf
