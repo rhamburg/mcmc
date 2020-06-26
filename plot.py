@@ -3,28 +3,20 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from math_functions import autocorrelation
+import scipy.stats
 
-def plot_samples(x, pdfx, pdfy, xlog=False, ylog=False, xlabel=None, ylabel=None):
+def plot_samples(x, pdfx, pdfy, bins=None, xlog=False, ylog=False, xlabel=None, ylabel=None):
     if xlog is not False:
         plt.xscale('log')
-        bins = np.logspace(-3, 3, 60)
         h = np.histogram(x, bins=bins)
-        yvals = h[0] / np.max(h[0])
-        plt.step(bins[:-1], yvals)
-        
-        #yvals, histbins = np.histogram(x, bins=bins)
-        #bindiff = np.diff(histbins)
-        #print (np.diff(histbins))
-        #print (np.diff(np.log10(histbins)))
-        #newy = yvals / yvals[0]
-        #newy = yvals / (len(x) * np.diff(histbins))
-        #plt.bar(histbins[:-1], newy, width=bindiff, align='edge', edgecolor='C0', color='None', label='samples')
+        hist_dist = scipy.stats.rv_histogram(h)
+        plt.plot(pdfx, hist_dist.pdf(pdfx), label='samples')
+        #plt.hist(x,bins=bins)
     elif xlog is False:
-        plt.hist(x, bins=30, histtype='step', density=True)
+        plt.hist(x, bins=30, histtype='step', density=True, label='samples')
     if ylog is not False:
         plt.yscale('log')
-    else:
-        plt.plot(pdfx, pdfy, color='red', label='pdf')
+    plt.plot(pdfx, pdfy, color='red', label='pdf')
     plt.legend()
     plt.show()
     plt.close()
