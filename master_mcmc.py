@@ -3,8 +3,7 @@ from configparser import ConfigParser
 from astropy.cosmology import FlatLambdaCDM
 from math_functions import band
 import numpy as np
-from prior import prior_dist
-from proposal import proposal_distribution
+from prior import prior_dist, proposal_distribution
 from scipy.integrate import quad
 from simulation import Simulation
 from source_functions import diff_comoving_volume, metro_hastings, metro_hastings_test, read_data
