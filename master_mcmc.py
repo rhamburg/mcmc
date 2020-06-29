@@ -31,7 +31,7 @@ if args.num_param is None:
 else:
     num_param = int(args.num_param)
 if args.filename is not None:
-    file = 'results/'+args.filename+'.npy'
+    file = '../results/'+args.filename+'.npy'
 if args.config is not None:
     config_file = args.config
 else:

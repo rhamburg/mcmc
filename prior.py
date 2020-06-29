@@ -14,7 +14,7 @@ parameter_bounds = {
 "coll beta":  [-5, 0, 'uniform'],
 "merg alpha": [-5, 0, 'uniform'],
 "merg beta":  [-5, 0, 'uniform'],
-"coll mu":    [1e-3,100, 'log-uniform'],
+"coll mu":    [1e-3,100, 'log-uniform'], # need to change these !!!
 "coll sigma": [1e-3, 10, 'log-uniform'],
 "merg mu":    [1e-3, 10, 'log-uniform'],
 "merg sigma": [1e-3, 10, 'log-uniform']
@@ -38,7 +38,19 @@ def proposal_distribution(parameter, x, tuning=1):
     n: float, either the new value of the parameter of -inf if the selection was
         outside parameter's prior bounds
     """
-    n = np.random.normal(x, tuning)
+    # Randomly select new parameter
+    # If the prior is a log-uniform distribution, use a log-normal proposal
+    # distribution instead of a normal distribution
+    type = parameter_bounds.get(parameter)[2]
+    if type == 'uniform':
+        n = np.random.normal(x, tuning)
+    elif type == 'log-uniform' or type == 'log uniform':
+        print (parameter)
+        n = np.random.lognormal(x, 2)
+    else:
+        print ('didnt find type of prior distribution')
+ 
+    # Check that parameter is within prior bounds
     if inbounds(n, parameter) is not True:
         # keep parameter at current value
         return -np.inf

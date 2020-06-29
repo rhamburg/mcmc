@@ -150,14 +150,21 @@ def plot_duration(x, y):
     return
 
 
-def trace(step, x, label=None):
+def trace(step, x, label=None, xlog=False, ylog=False):
     # Trace plots of parameters
+    if ylog is not False:
+        plt.yscale('log')
     plt.plot(step, x, label=label)
     plt.legend()
     plt.xlabel('iteration')
     plt.title('Trace Plot')
     plt.show()
     plt.close()
+    #plt.hist(x, label=label)
+    #plt.legend()
+    #plt.xlabel(label)
+    #plt.show()
+    #plt.close()
     return
 
 
