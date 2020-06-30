@@ -17,6 +17,7 @@ parser.add_argument('-p', '--plotGRB', help='Boolean for plotting peak flux info
 parser.add_argument('-n', '--num_param', help='Number of parmeters to search')
 parser.add_argument('-c', '--config', help='Path to config file to initialize parameters')
 parser.add_argument('-P', '--prior', help='Boolean to determine if just sampling priors and not posterior')
+parser.add_argument('-s', '--simulation', help='Boolean to determine whether making simulated data')
 args = parser.parse_args()
 
 
@@ -31,7 +32,10 @@ if args.num_param is None:
 else:
     num_param = int(args.num_param)
 if args.filename is not None:
-    file = '../results/'+args.filename+'.npy'
+    if args.simulation is not None:
+        file = args.filename
+    else:
+        file = '../results/'+args.filename+'.npy'
 if args.config is not None:
     config_file = args.config
 else:
@@ -40,6 +44,11 @@ if args.prior is None:
     args.prior = False
 else:
     print ('TESTING PRIOR DISTRIBUTIONS...')
+if args.simulation is None:
+    make_sim_data = False
+else:
+    make_sim_data = True
+
 
 config = ConfigParser()
 config.read(config_file)
@@ -197,7 +206,7 @@ for i in range(0, args.iter+1):
             parameter_dict, num_param, detector=detector, durations=durations,
             redshifts=redshifts, luminosities=luminosities, obs_pf=obs_pf,
             dl=dl, options=options, vol_arr=v_comov, kc=kcorr, plot_GRB=plot,
-            prior=args.prior)
+            prior=args.prior, sim=make_sim_data, file=args.filename)
 
     if i > 0:
         # Previous parameter_space entry with parameter pdx
@@ -230,7 +239,7 @@ for i in range(0, args.iter+1):
             eff_step += 1
 
     # Every so often, save the results
-    if np.mod(i, 10000) == 0:
+    if np.mod(i, 10000) == 0 and make_sim_data is not True:
         if args.filename is not None:
             print ('Saving '+file+'...')
             np.save(file, parameter_space)
@@ -242,6 +251,6 @@ if args.iter > 0:
 
 
 # Save file of parameters, LLRs, and diagnostics
-if args.filename is not None:
+if args.filename is not None and make_sim_data is not True:
     np.save(file, parameter_space)
     print (file)

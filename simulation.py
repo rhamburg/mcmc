@@ -7,7 +7,7 @@ import time
 
 def Simulation(ps, par_dict, num_param, redshifts=None, luminosities=None,
 durations=None, obs_pf=None, detector=None, options=None, vol_arr=None, kc=None,
-dl=None, plot_GRB=None, prior=False):
+dl=None, plot_GRB=None, prior=False, sim=False, file=None):
 
     # Option for prior testing
     if prior is not False:
@@ -47,7 +47,8 @@ dl=None, plot_GRB=None, prior=False):
         N_merg = np.int(N_merg*11.5)
     except:
         return -np.inf
-
+    print (N_coll, N_merg)
+    
     # Draw random redshifts from collapsar pdf
     redshift_sample_coll = sample_distribution(redshifts,
         redshift_pdf_coll, num_draw=N_coll, xlabel='Redshift', ylog=False,
@@ -121,18 +122,24 @@ dl=None, plot_GRB=None, prior=False):
     coll_pf_all, coll_pf = Peak_flux(L=lum_sample_coll,
         z=redshift_sample_coll, kcorr=coll_kc, dl=coll_dl,
         emin=detector.getfloat('nai_emin'),
-        emax=detector.getfloat('nai_emax'), plotting=plot_GRB)
+        emax=detector.getfloat('nai_emax'), plotting=plot_GRB, sim=sim)
     # Get model peak flux for simulated collapsar GRBs
     merg_pf_all, merg_pf = Peak_flux(L=lum_sample_merg,
         z=redshift_sample_merg, kcorr=merg_kc, dl=merg_dl,
         emin=detector.getfloat('nai_emin'),
-        emax=detector.getfloat('nai_emax'), plotting=plot_GRB)
+        emax=detector.getfloat('nai_emax'), plotting=plot_GRB, sim=sim)
 
     # Combine collapsar and merger model counts
     pf_model, pf_data = combine_data(coll_model=coll_pf, merg_model=merg_pf,
         data=obs_pf, coll_all=coll_pf_all, merg_all=merg_pf_all,
         coll_model_label='Collapsar Model', merg_model_label='Merger Model',
-        data_label='GBM Data', show_plot=plot_GRB)
+        data_label='GBM Data', show_plot=plot_GRB, sim=sim)
+    
+    # Save peak flux data
+    if sim is not False and file is not None:
+        print ('Saving simulation data: ../'+file+'.npy')
+        np.save('../'+file+'.npy', pf_model)
+    
 
     # Calculate the likelihood for this model (i.e., these parameters)
     try:

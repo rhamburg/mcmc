@@ -178,10 +178,12 @@ def intrinsic_duration(durations, mu=1, sigma=1, plot=False):
 Calculate peak flux
 """
 def Peak_flux(L=None,z=None, threshold=1., kcorr=None, emin=10, emax=1000,
-dl=None, plotting=False):
+dl=None, plotting=False, sim=False):
     # Peak photon flux
     pf = (1+z) * (L / (4 * np.pi * dl**2)) * kcorr
     corr_pf = np.array(pf)
+    if sim is not False:
+        return corr_pf, corr_pf
     # Correct for GBM FOV
     if len(corr_pf) > 0:
         num_fov = int(len(corr_pf) * 0.67 * 0.85)
@@ -244,7 +246,7 @@ def log_likelihood(model_counts, data_counts):
 
 def combine_data(coll_model=None, merg_model=None, data=None, coll_all=None,
 merg_all=None, show_plot=False, coll_model_label=None, merg_model_label=None,
-data_label=None):
+data_label=None, sim=False):
     """
     Combine data to prepare for LLR calculation
 
@@ -270,7 +272,7 @@ data_label=None):
     data_counts, data_bin_edges = np.histogram(data, bins=bins)
     if show_plot is not False:
         plot_peak_flux(coll_all, merg_all, coll_model, merg_model, data,
-            coll_model_label, merg_model_label, tot_model)
+            coll_model_label, merg_model_label, tot_model, sim=sim)
     return model_counts, data_counts
 
 
