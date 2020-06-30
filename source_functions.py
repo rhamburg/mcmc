@@ -24,7 +24,7 @@ def read_data(type='all'):
     ------------
     peak fluxes, durations lists
     """
-    file = ascii.read("gbm_bursts_t90_flux.txt", data_start=1)
+    file = ascii.read("../data/gbm_bursts_t90_flux.txt", data_start=1)
     if type == 'long':
         long_GRBs = file[np.where(file["col3"]>2.)]
         return long_GRBs["col5"], long_GRBs["col3"]
@@ -34,22 +34,27 @@ def read_data(type='all'):
     else:
         return file["col5"], file["col3"]
 
-"""
-# Find cdf interval j such that the random number is in that interval
-# Draw randomly from a distribution
-Parameters:
------------
-xpdf: pdf of distribution you want to draw from
-cdf: cdf of distribution you want to draw from
-num_draw: num of random draws from the distribution
-"""
+
 def draw_samples(pdf, cdf, num_draw=1000):
+    """
+    # Find cdf interval j such that the random number is in that interval
+    # Draw randomly from a distribution
+    
+    Parameters:
+    -----------
+    xpdf: pdf of distribution you want to draw from
+    cdf: cdf of distribution you want to draw from
+    num_draw: num of random draws from the distribution
+    
+    Returns:
+    sample: array of randomly drawn values from the pdf
+    """
     #random.seed(3)
     draws = random.random(num_draw)
     sample = [pdf[np.searchsorted(cdf, draws)]][0]
     return sample
-
-
+    
+    
 def get_luminosity(lum, alpha=0.2, beta=1.4, lstar=1E52, lmin=1E49, lmax=1E52,
 plot=False):
     """
@@ -108,12 +113,12 @@ xlog=False, ylog=False):
     cdf_normed: the normalized cdf of the pdf
     """
     cdf = np.cumsum(pdf)
-    cdf_normed = [c/cdf[-1] for c in cdf]
+    cdf_normed = np.array([c/cdf[-1] for c in cdf])
     random_xs = draw_samples(xs, cdf_normed, num_draw=num_draw)
     if plot is not False:
         plot_cdf(xs, cdf_normed, xlabel, xlog, ylog)
     return random_xs#, cdf_normed
-
+    
 
 def source_rate_density(redshifts, rho0=1., z_star=1., n1=1., n2=1.,
 vol_arr=None, plot=False):
