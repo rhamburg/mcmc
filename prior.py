@@ -1,15 +1,16 @@
 import numpy as np
+import random
 
 # Parameter dictionary
 parameter_bounds = {
 "coll z1":    [0, 5, 'uniform'],
 "coll z2":    [-5, 0, 'uniform'],
 "coll z*":    [1e-5, 6, 'log-uniform'],
-"coll rho0":  [0.01,10, 'log-uniform'],
+"coll rho0":  [0.01,10, 'log-uniform'], # need to change
 "merg z1":    [0, 5, 'uniform'],
 "merg z2":    [-5, 0, 'uniform'],
 "merg z*":    [1e-5, 6, 'log-uniform'],
-"merg rho0":  [0.01,10, 'log-uniform'],
+"merg rho0":  [0.01,10, 'log-uniform'], # need to change
 "coll alpha": [-5, 0, 'uniform'],
 "coll beta":  [-5, 0, 'uniform'],
 "merg alpha": [-5, 0, 'uniform'],
@@ -45,8 +46,7 @@ def proposal_distribution(parameter, x, tuning=1):
     if type == 'uniform':
         n = np.random.normal(x, tuning)
     elif type == 'log-uniform' or type == 'log uniform':
-        print (parameter)
-        n = np.random.lognormal(x, 2)
+        n = np.random.lognormal(x, 10)
     else:
         print ('didnt find type of prior distribution')
  

@@ -12,7 +12,7 @@ from plot import *
 import time
 
 
-def read_data(type='all'):
+def read_data(data_file=None, type='all'):
     """
     # GBM's peak flux and duration (t90) distributions
     
@@ -24,7 +24,12 @@ def read_data(type='all'):
     ------------
     peak fluxes, durations lists
     """
+    # Read from standard ascii file
     file = ascii.read("../data/gbm_bursts_t90_flux.txt", data_start=1)
+    if data_file is not None:
+        # Read simulated data from numpy file
+        data_file = np.load(data_file)
+        return data_file, file["col3"] # BAD CODING HERE NEED TO CHANGE
     if type == 'long':
         long_GRBs = file[np.where(file["col3"]>2.)]
         return long_GRBs["col5"], long_GRBs["col3"]
@@ -49,7 +54,7 @@ def draw_samples(pdf, cdf, num_draw=1000):
     Returns:
     sample: array of randomly drawn values from the pdf
     """
-    #random.seed(3)
+    #random.seed(1)
     draws = random.random(num_draw)
     sample = [pdf[np.searchsorted(cdf, draws)]][0]
     return sample
@@ -178,15 +183,16 @@ def intrinsic_duration(durations, mu=1, sigma=1, plot=False):
 Calculate peak flux
 """
 def Peak_flux(L=None,z=None, threshold=1., kcorr=None, emin=10, emax=1000,
-dl=None, plotting=False, sim=False):
+dl=None, plotting=False, sim=False, dsim=False):
     # Peak photon flux
     pf = (1+z) * (L / (4 * np.pi * dl**2)) * kcorr
     corr_pf = np.array(pf)
-    if sim is not False:
+    if sim is not False or dsim is not False:
         return corr_pf, corr_pf
     # Correct for GBM FOV
     if len(corr_pf) > 0:
         num_fov = int(len(corr_pf) * 0.67 * 0.85)
+        #random.seed(123)
         idx_fov = random.random_integers(0, len(corr_pf)-1, num_fov)
         corr_pf = corr_pf[idx_fov]
         L = L[idx_fov]
@@ -267,12 +273,12 @@ data_label=None, sim=False):
     data_counts - list of GRBs in each data peak flux histogram bin
     """
     tot_model = np.concatenate([coll_model, merg_model])
-    bins=np.logspace(-1, 3, 70)
+    bins=np.logspace(-3, 3, 80)
     model_counts, model_bin_edges = np.histogram(tot_model, bins=bins)
     data_counts, data_bin_edges = np.histogram(data, bins=bins)
     if show_plot is not False:
         plot_peak_flux(coll_all, merg_all, coll_model, merg_model, data,
-            coll_model_label, merg_model_label, tot_model, sim=sim)
+            coll_model_label, merg_model_label, tot_model, bins=bins, sim=sim)
     return model_counts, data_counts
 
 

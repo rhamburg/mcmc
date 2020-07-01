@@ -91,10 +91,8 @@ def plot_peak_flux_norm(model_counts, data_counts, bins):
     return
 
 def plot_peak_flux(coll_all, merg_all, coll_mod, merg_mod, data,
-            coll_model_label, merg_model_label, total_cut_model, sim=False):
+            coll_model_label, merg_model_label, total_cut_model, bins=None, sim=False):
     total_model = np.concatenate([coll_all,merg_all])
-    bins = np.logspace(-1, 3, 70)
-    bins = np.logspace(-3, 3, 70)
     # Unnormalized plots of all data
     plt.hist(coll_all, bins=bins, histtype='step', label=coll_model_label)
     plt.hist(merg_all, bins=bins, histtype='step', label=merg_model_label)
@@ -110,8 +108,6 @@ def plot_peak_flux(coll_all, merg_all, coll_mod, merg_mod, data,
     plt.close()
 
     # Unnormalized cut peak flux
-    bins=np.logspace(-3, 3, 70)
-    #bins = np.logspace(-11, -7, 200)
     #plt.hist(coll_mod, bins=bins, histtype='step', label=coll_model_label)
     #plt.hist(merg_mod, bins=bins, histtype='step', label=merg_model_label)
     plt.hist(total_cut_model, bins=bins, histtype='step', label='Model (All)')

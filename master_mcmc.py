@@ -18,6 +18,7 @@ parser.add_argument('-n', '--num_param', help='Number of parmeters to search')
 parser.add_argument('-c', '--config', help='Path to config file to initialize parameters')
 parser.add_argument('-P', '--prior', help='Boolean to determine if just sampling priors and not posterior')
 parser.add_argument('-s', '--simulation', help='Boolean to determine whether making simulated data')
+parser.add_argument('-d', '--read_sim', help='Filename to read as simulated data')
 args = parser.parse_args()
 
 
@@ -48,7 +49,12 @@ if args.simulation is None:
     make_sim_data = False
 else:
     make_sim_data = True
-
+if args.read_sim is None:
+    data_file = None
+    dsim = False
+else:
+    data_file = args.read_sim
+    dsim = True
 
 config = ConfigParser()
 config.read(config_file)
@@ -65,7 +71,7 @@ print ('\nGRB Peak Flux Simulator\n')
 
 # Read GBM data [peak flux 10-1000 keV]
 print ('Reading data file...')
-obs_pf, obs_t90 = read_data()
+obs_pf, obs_t90 = read_data(data_file=data_file)
 
 # Durations
 NSIM = iterations.getint('NSIM')
@@ -193,7 +199,7 @@ for i in range(0, args.iter+1):
         # Update parameter_space[i] with random proposed value
         parameter_space[i][pdx] = proposal_distribution(keyword[0],
             current_value)
-        #print (keyword,parameter_space[i][pdx])
+   
     # If parameter is out of prior bounds, do not calculate likelihood.
     # Set posterior equal to the proposal (i.e., -inf).
     # If parameter is within prior bounds, calculate posterior from peak flux.
@@ -206,7 +212,7 @@ for i in range(0, args.iter+1):
             parameter_dict, num_param, detector=detector, durations=durations,
             redshifts=redshifts, luminosities=luminosities, obs_pf=obs_pf,
             dl=dl, options=options, vol_arr=v_comov, kc=kcorr, plot_GRB=plot,
-            prior=args.prior, sim=make_sim_data, file=args.filename)
+            prior=args.prior, sim=make_sim_data, file=args.filename, dsim=dsim)
 
     if i > 0:
         # Previous parameter_space entry with parameter pdx
@@ -227,7 +233,7 @@ for i in range(0, args.iter+1):
                 proposed_post=parameter_space[i][post_idx],
                 total_accept=total_accept,
                 p_accept=parameter_space[step_back][p_accept_idx])
-
+                
         # Record the effective step of the parameter
         parameter_space[i][eff_step_idx] = eff_step
 
