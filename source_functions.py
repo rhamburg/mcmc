@@ -2,17 +2,16 @@ from astropy.io import ascii
 from astropy.cosmology import FlatLambdaCDM
 import numpy as np
 from numpy import random
+from math_functions import *
 import matplotlib.pyplot as plt
+from plot import *
 import scipy
 from scipy.constants import c
 from scipy.integrate import quad, quad_explain
-from math_functions import *
-import matplotlib
-from plot import *
 import time
 
 
-def read_data(type='all'):
+def read_data(data_file=None, type='all'):
     """
     # GBM's peak flux and duration (t90) distributions
     
@@ -24,7 +23,12 @@ def read_data(type='all'):
     ------------
     peak fluxes, durations lists
     """
-    file = ascii.read("gbm_bursts_t90_flux.txt", data_start=1)
+    # Read from standard ascii file
+    file = ascii.read("../data/gbm_bursts_t90_flux.txt", data_start=1)
+    if data_file is not None:
+        # Read simulated data from numpy file
+        data_file = np.load(data_file)
+        return data_file, file["col3"] # BAD CODING HERE NEED TO CHANGE
     if type == 'long':
         long_GRBs = file[np.where(file["col3"]>2.)]
         return long_GRBs["col5"], long_GRBs["col3"]
@@ -34,22 +38,25 @@ def read_data(type='all'):
     else:
         return file["col5"], file["col3"]
 
-"""
-# Find cdf interval j such that the random number is in that interval
-# Draw randomly from a distribution
-Parameters:
------------
-xpdf: pdf of distribution you want to draw from
-cdf: cdf of distribution you want to draw from
-num_draw: num of random draws from the distribution
-"""
-def draw_samples(pdf, cdf, num_draw=1000):
-    #random.seed(3)
-    draws = random.random(num_draw)
+
+def draw_samples(pdf, cdf, draws=None, num_draw=1000):
+    """
+    # Find cdf interval j such that the random number is in that interval
+    # Draw randomly from a distribution
+    
+    Parameters:
+    -----------
+    xpdf: pdf of distribution you want to draw from
+    cdf: cdf of distribution you want to draw from
+    num_draw: num of random draws from the distribution
+    
+    Returns:
+    sample: array of randomly drawn values from the pdf
+    """
     sample = [pdf[np.searchsorted(cdf, draws)]][0]
     return sample
-
-
+    
+    
 def get_luminosity(lum, alpha=0.2, beta=1.4, lstar=1E52, lmin=1E49, lmax=1E52,
 plot=False):
     """
@@ -87,14 +94,14 @@ plot=False):
     return pdf_normed, A
 
 
-def sample_distribution(xs, pdf, num_draw=1000, plot=False, xlabel=None,
+def sample_distribution(xs, pdf, draws=None, num_draw=1000, plot=False, xlabel=None,
 xlog=False, ylog=False):
     """
     # Sample luminosity and redshift distributions
 
     Parameters:
     -----------
-    xs: input depedent values
+    xs: input dependent values
     pdf: distribution pdf
     num_draw: number of GRBs to randomly draw from cdf
     plot: option to plot cdf
@@ -108,12 +115,12 @@ xlog=False, ylog=False):
     cdf_normed: the normalized cdf of the pdf
     """
     cdf = np.cumsum(pdf)
-    cdf_normed = [c/cdf[-1] for c in cdf]
-    random_xs = draw_samples(xs, cdf_normed, num_draw=num_draw)
+    cdf_normed = np.array([c/cdf[-1] for c in cdf])
+    random_xs = test_draw_samples(xs, cdf_normed, draws, num_draw=num_draw)
     if plot is not False:
         plot_cdf(xs, cdf_normed, xlabel, xlog, ylog)
     return random_xs#, cdf_normed
-
+    
 
 def source_rate_density(redshifts, rho0=1., z_star=1., n1=1., n2=1.,
 vol_arr=None, plot=False):
@@ -173,13 +180,16 @@ def intrinsic_duration(durations, mu=1, sigma=1, plot=False):
 Calculate peak flux
 """
 def Peak_flux(L=None,z=None, threshold=1., kcorr=None, emin=10, emax=1000,
-dl=None, plotting=False):
+dl=None, plotting=False, sim=False, dsim=False):
     # Peak photon flux
     pf = (1+z) * (L / (4 * np.pi * dl**2)) * kcorr
     corr_pf = np.array(pf)
+    if sim is not False or dsim is not False:
+        return corr_pf, corr_pf
     # Correct for GBM FOV
     if len(corr_pf) > 0:
         num_fov = int(len(corr_pf) * 0.67 * 0.85)
+        #random.seed(123)
         idx_fov = random.random_integers(0, len(corr_pf)-1, num_fov)
         corr_pf = corr_pf[idx_fov]
         L = L[idx_fov]
@@ -239,7 +249,7 @@ def log_likelihood(model_counts, data_counts):
 
 def combine_data(coll_model=None, merg_model=None, data=None, coll_all=None,
 merg_all=None, show_plot=False, coll_model_label=None, merg_model_label=None,
-data_label=None):
+data_label=None, sim=False):
     """
     Combine data to prepare for LLR calculation
 
@@ -260,12 +270,12 @@ data_label=None):
     data_counts - list of GRBs in each data peak flux histogram bin
     """
     tot_model = np.concatenate([coll_model, merg_model])
-    bins=np.logspace(-1, 3, 70)
+    bins=np.logspace(-3, 3, 80)
     model_counts, model_bin_edges = np.histogram(tot_model, bins=bins)
     data_counts, data_bin_edges = np.histogram(data, bins=bins)
     if show_plot is not False:
         plot_peak_flux(coll_all, merg_all, coll_model, merg_model, data,
-            coll_model_label, merg_model_label, tot_model)
+            coll_model_label, merg_model_label, tot_model, bins=bins, sim=sim)
     return model_counts, data_counts
 
 

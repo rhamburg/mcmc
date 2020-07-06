@@ -4,10 +4,12 @@ from astropy.cosmology import FlatLambdaCDM
 from math_functions import band
 import numpy as np
 from prior import prior_dist, proposal_distribution
+from numpy import random
 from scipy.integrate import quad
 from simulation import Simulation
 from source_functions import diff_comoving_volume, metro_hastings, metro_hastings_test, read_data
 import time
+#random.seed(3)
 
 # Read arguments
 parser = ArgumentParser(prog='Thesis Program', description='Fitting GBM Peak Flux Distributions')
@@ -17,29 +19,44 @@ parser.add_argument('-p', '--plotGRB', help='Boolean for plotting peak flux info
 parser.add_argument('-n', '--num_param', help='Number of parmeters to search')
 parser.add_argument('-c', '--config', help='Path to config file to initialize parameters')
 parser.add_argument('-P', '--prior', help='Boolean to determine if just sampling priors and not posterior')
+parser.add_argument('-s', '--simulation', help='Boolean to determine whether making simulated data')
+parser.add_argument('-d', '--read_sim', help='Filename to read as simulated data')
 args = parser.parse_args()
 
 
-if args.iter is None:
-    args.iter = 0
-if args.plotGRB is not None:
-    plot = args.plotGRB
-else:
-    plot = None
-if args.num_param is None:
-    raise Exception('Need to specifiy number of parameters to search')
-else:
-    num_param = int(args.num_param)
-if args.filename is not None:
-    file = 'results/'+args.filename+'.npy'
 if args.config is not None:
     config_file = args.config
 else:
     config_file = 'parameters.ini'
+if args.iter is None:
+    args.iter = 0
+if args.num_param is None:
+    num_param = 1
+else:
+    num_param = int(args.num_param)
+if args.plotGRB is not None:
+    plot = args.plotGRB
+else:
+    plot = None
+if args.filename is not None:
+    if args.simulation is not None:
+        file = args.filename
+    else:
+        file = '../results/'+args.filename+'.npy'
 if args.prior is None:
     args.prior = False
 else:
     print ('TESTING PRIOR DISTRIBUTIONS...')
+if args.simulation is None:
+    make_sim_data = False
+else:
+    make_sim_data = True
+if args.read_sim is None:
+    data_file = None
+    dsim = False
+else:
+    data_file = args.read_sim
+    dsim = True
 
 config = ConfigParser()
 config.read(config_file)
@@ -50,13 +67,12 @@ redshift = config['redshift']
 duration = config['duration']
 options = config['options']
 
-
 print ('\nGRB Peak Flux Simulator\n')
 
 
 # Read GBM data [peak flux 10-1000 keV]
 print ('Reading data file...')
-obs_pf, obs_t90 = read_data()
+obs_pf, obs_t90 = read_data(data_file=data_file)
 
 # Durations
 NSIM = iterations.getint('NSIM')
@@ -180,11 +196,11 @@ for i in range(0, args.iter+1):
         # Copy previous step's info
         parameter_space[i] = parameter_space[i-1]
         # Dictionary keyword for parameter to update (only do one per iteration)
-        keyword = [x for x,y in parameter_dict.items() if y==pdx]
+        keyword = [x for x,y in parameter_dict.items() if y==pdx][0]
         # Update parameter_space[i] with random proposed value
-        parameter_space[i][pdx] = proposal_distribution(keyword[0],
+        parameter_space[i][pdx] = proposal_distribution(keyword,
             current_value)
-        #print (keyword,parameter_space[i][pdx])
+    print (parameter_space[i])
     # If parameter is out of prior bounds, do not calculate likelihood.
     # Set posterior equal to the proposal (i.e., -inf).
     # If parameter is within prior bounds, calculate posterior from peak flux.
@@ -197,7 +213,7 @@ for i in range(0, args.iter+1):
             parameter_dict, num_param, detector=detector, durations=durations,
             redshifts=redshifts, luminosities=luminosities, obs_pf=obs_pf,
             dl=dl, options=options, vol_arr=v_comov, kc=kcorr, plot_GRB=plot,
-            prior=args.prior)
+            prior=args.prior, sim=make_sim_data, file=args.filename, dsim=dsim)
 
     if i > 0:
         # Previous parameter_space entry with parameter pdx
@@ -207,7 +223,7 @@ for i in range(0, args.iter+1):
         # Change only if parameter is rejected, which should be most of the time
         # (probably more efficient if only change if parameter is accepted,
         # but doesn't work with my code right now)
-
+        
         # Give proposed parameter, LL with proposed parameter, previous
         # parameter acceptance ratio, and total acceptance ratio
         parameter_space[i][pdx], parameter_space[i][post_idx], \
@@ -218,7 +234,7 @@ for i in range(0, args.iter+1):
                 proposed_post=parameter_space[i][post_idx],
                 total_accept=total_accept,
                 p_accept=parameter_space[step_back][p_accept_idx])
-
+                
         # Record the effective step of the parameter
         parameter_space[i][eff_step_idx] = eff_step
 
@@ -230,7 +246,7 @@ for i in range(0, args.iter+1):
             eff_step += 1
 
     # Every so often, save the results
-    if np.mod(i, 10000) == 0:
+    if np.mod(i, 10000) == 0 and make_sim_data is not True:
         if args.filename is not None:
             print ('Saving '+file+'...')
             np.save(file, parameter_space)
@@ -242,6 +258,6 @@ if args.iter > 0:
 
 
 # Save file of parameters, LLRs, and diagnostics
-if args.filename is not None:
+if args.filename is not None and make_sim_data is not True:
     np.save(file, parameter_space)
     print (file)
