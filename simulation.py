@@ -3,6 +3,7 @@ from numpy import random
 from prior import prior_dist
 from source_functions import *
 from plot import plot_samples
+import tempfile
 import time
 
 def Simulation(ps, par_dict, num_param, redshifts=None, luminosities=None,
@@ -22,7 +23,7 @@ dl=None, plot_GRB=None, prior=False, sim=False, dsim=False, file=None):
         plot_GRB = options.getboolean('plot_GRB')
     plot_func = options.getboolean('plotting')
     #sim_time = time.time()
-
+    
     ## Redshifts
     # Collapsar redshift pdf [number / yr] all-sky
     redshift_pdf_coll, N_coll = source_rate_density(redshifts,
@@ -47,15 +48,17 @@ dl=None, plot_GRB=None, prior=False, sim=False, dsim=False, file=None):
         N_merg = np.int(N_merg*11.5)
     except:
         return -np.inf
-    #print (N_coll, N_merg)
+    print (N_coll, N_merg)
     
     # Draw random redshifts from collapsar pdf
+    coll_draws = random.random(N_coll)
+    merg_draws = random.random(N_merg)
     redshift_sample_coll = sample_distribution(redshifts,
-        redshift_pdf_coll, num_draw=N_coll, xlabel='Redshift', ylog=False,
+        redshift_pdf_coll, draws=coll_draws, xlabel='Redshift', ylog=False,
         plot=plot_func)
     # Draw random redshifts from merger pdf
     redshift_sample_merg = sample_distribution(redshifts,
-        redshift_pdf_merg, num_draw=N_merg, xlabel='Redshift', ylog=False,
+        redshift_pdf_merg, draws=merg_draws, xlabel='Redshift', ylog=False,
         plot=plot_func)
 
     # Plot randomly drawn samples and pdf to ensure sim is done correctly
@@ -87,12 +90,12 @@ dl=None, plot_GRB=None, prior=False, sim=False, dsim=False, file=None):
 
     # Draw random collapsar luminosities from pdf
     lum_sample_coll = sample_distribution(luminosities,
-        lum_pdf_coll, num_draw=N_coll,
+        lum_pdf_coll, draws=coll_draws,
         xlabel='Peak Luminosity (1-10,000 keV)[ergs/s]',
         xlog=True, ylog=False, plot=plot_func)
     # Draw random merger luminosities from pdf
     lum_sample_merg = sample_distribution(luminosities,
-        lum_pdf_merg, num_draw=N_merg,
+        lum_pdf_merg, draws=merg_draws,
         xlabel='Peak Luminosity (1-10,000 keV)[ergs/s]',
         xlog=True, ylog=False, plot=plot_func)
     
@@ -102,21 +105,19 @@ dl=None, plot_GRB=None, prior=False, sim=False, dsim=False, file=None):
         plot_samples(lum_sample_coll, luminosities, lum_pdf_coll, bins=bins, xlog=True, ylog=True)
         plot_samples(lum_sample_merg, luminosities, lum_pdf_merg, bins=bins, xlog=True, ylog=True)
     
-    
     ## Duration
     # Collapsar duration pdf
     coll_dur_pdf = intrinsic_duration(durations, mu=ps[par_dict["coll mu"]], sigma=ps[par_dict["coll sigma"]], plot=plot_func)
-    dur_sample_coll = sample_distribution(durations, coll_dur_pdf, plot=plot_func, num_draw=N_coll)
+    dur_sample_coll = sample_distribution(durations, coll_dur_pdf, plot=plot_func, draws=coll_draws)
     # Merger duration pdf
     merg_dur_pdf = intrinsic_duration(durations, mu=ps[par_dict["merg mu"]], sigma=ps[par_dict["merg sigma"]], plot=plot_func)
-    dur_sample_merg = sample_distribution(durations, merg_dur_pdf, plot=plot_func, num_draw=N_merg)
+    dur_sample_merg = sample_distribution(durations, merg_dur_pdf, plot=plot_func, draws=merg_draws)
     
     # Plot randomly drawn samples and pdf to ensure sim is done correctly
     if plot_func is not False:
         bins = np.logspace(-3, 3, 60)
         plot_samples(dur_sample_coll, durations, coll_dur_pdf, bins=bins, xlog=True)
     
-
     ## Peak flux
     # Get model peak flux for simulated collapsar GRBs
     coll_pf_all, coll_pf = Peak_flux(L=lum_sample_coll,

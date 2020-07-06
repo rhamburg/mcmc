@@ -4,10 +4,12 @@ from astropy.cosmology import FlatLambdaCDM
 from math_functions import band
 import numpy as np
 from prior import prior_dist, proposal_distribution
+from numpy import random
 from scipy.integrate import quad
 from simulation import Simulation
 from source_functions import diff_comoving_volume, metro_hastings, metro_hastings_test, read_data
 import time
+#random.seed(3)
 
 # Read arguments
 parser = ArgumentParser(prog='Thesis Program', description='Fitting GBM Peak Flux Distributions')
@@ -22,25 +24,25 @@ parser.add_argument('-d', '--read_sim', help='Filename to read as simulated data
 args = parser.parse_args()
 
 
+if args.config is not None:
+    config_file = args.config
+else:
+    config_file = 'parameters.ini'
 if args.iter is None:
     args.iter = 0
+if args.num_param is None:
+    num_param = 1
+else:
+    num_param = int(args.num_param)
 if args.plotGRB is not None:
     plot = args.plotGRB
 else:
     plot = None
-if args.num_param is None:
-    raise Exception('Need to specifiy number of parameters to search')
-else:
-    num_param = int(args.num_param)
 if args.filename is not None:
     if args.simulation is not None:
         file = args.filename
     else:
         file = '../results/'+args.filename+'.npy'
-if args.config is not None:
-    config_file = args.config
-else:
-    config_file = 'parameters.ini'
 if args.prior is None:
     args.prior = False
 else:
@@ -64,7 +66,6 @@ luminosity = config['luminosity']
 redshift = config['redshift']
 duration = config['duration']
 options = config['options']
-
 
 print ('\nGRB Peak Flux Simulator\n')
 
@@ -195,11 +196,11 @@ for i in range(0, args.iter+1):
         # Copy previous step's info
         parameter_space[i] = parameter_space[i-1]
         # Dictionary keyword for parameter to update (only do one per iteration)
-        keyword = [x for x,y in parameter_dict.items() if y==pdx]
+        keyword = [x for x,y in parameter_dict.items() if y==pdx][0]
         # Update parameter_space[i] with random proposed value
-        parameter_space[i][pdx] = proposal_distribution(keyword[0],
+        parameter_space[i][pdx] = proposal_distribution(keyword,
             current_value)
-   
+    print (parameter_space[i])
     # If parameter is out of prior bounds, do not calculate likelihood.
     # Set posterior equal to the proposal (i.e., -inf).
     # If parameter is within prior bounds, calculate posterior from peak flux.
@@ -222,7 +223,7 @@ for i in range(0, args.iter+1):
         # Change only if parameter is rejected, which should be most of the time
         # (probably more efficient if only change if parameter is accepted,
         # but doesn't work with my code right now)
-
+        
         # Give proposed parameter, LL with proposed parameter, previous
         # parameter acceptance ratio, and total acceptance ratio
         parameter_space[i][pdx], parameter_space[i][post_idx], \

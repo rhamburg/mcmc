@@ -2,13 +2,12 @@ from astropy.io import ascii
 from astropy.cosmology import FlatLambdaCDM
 import numpy as np
 from numpy import random
+from math_functions import *
 import matplotlib.pyplot as plt
+from plot import *
 import scipy
 from scipy.constants import c
 from scipy.integrate import quad, quad_explain
-from math_functions import *
-import matplotlib
-from plot import *
 import time
 
 
@@ -40,7 +39,7 @@ def read_data(data_file=None, type='all'):
         return file["col5"], file["col3"]
 
 
-def draw_samples(pdf, cdf, num_draw=1000):
+def draw_samples(pdf, cdf, draws=None, num_draw=1000):
     """
     # Find cdf interval j such that the random number is in that interval
     # Draw randomly from a distribution
@@ -54,8 +53,6 @@ def draw_samples(pdf, cdf, num_draw=1000):
     Returns:
     sample: array of randomly drawn values from the pdf
     """
-    #random.seed(1)
-    draws = random.random(num_draw)
     sample = [pdf[np.searchsorted(cdf, draws)]][0]
     return sample
     
@@ -97,14 +94,14 @@ plot=False):
     return pdf_normed, A
 
 
-def sample_distribution(xs, pdf, num_draw=1000, plot=False, xlabel=None,
+def sample_distribution(xs, pdf, draws=None, num_draw=1000, plot=False, xlabel=None,
 xlog=False, ylog=False):
     """
     # Sample luminosity and redshift distributions
 
     Parameters:
     -----------
-    xs: input depedent values
+    xs: input dependent values
     pdf: distribution pdf
     num_draw: number of GRBs to randomly draw from cdf
     plot: option to plot cdf
@@ -119,7 +116,7 @@ xlog=False, ylog=False):
     """
     cdf = np.cumsum(pdf)
     cdf_normed = np.array([c/cdf[-1] for c in cdf])
-    random_xs = draw_samples(xs, cdf_normed, num_draw=num_draw)
+    random_xs = test_draw_samples(xs, cdf_normed, draws, num_draw=num_draw)
     if plot is not False:
         plot_cdf(xs, cdf_normed, xlabel, xlog, ylog)
     return random_xs#, cdf_normed
