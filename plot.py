@@ -27,16 +27,6 @@ def plot_rate(redshifts, rate, ylabel=None, title=None):
     plt.xlabel('Redshift')
     plt.ylabel(ylabel)
     plt.title(title)
-    '''
-    # Intrinsic comoving grb rate [$Gpc^{-3} yr^{-1}$]
-    sum = quad(int_grb_rate, redshifts[0], redshifts[-1], args=(z_star, n1, n2, rho0))
-    pdf = [int_grb_rate(z, r_0=rho0/sum[0], z_star=z_star, n1=n1, n2=n2) for z in redshifts]
-    second = plt.subplot(grid[0, 2:])
-    second.plot(redshifts, pdf)
-    plt.xlabel('Redshift')
-    plt.ylabel(r'$R_{GRB}$ [$Gpc^{-1} yr^{-1}$]')
-    plt.title('Normalized Comoving GRB Rate')
-    '''
     plt.show()
     plt.close()
     return
@@ -67,13 +57,13 @@ def plot_det_thresh(s=1, w=1):
     plt.show()
     return
 
-def plot_peak_flux_color(L, z, corr_pf):
+def plot_peak_flux_color(L, z, corr_pf, title=None):
     plt.scatter(L, z, c=corr_pf, cmap='hsv', norm=matplotlib.colors.LogNorm())
     plt.xscale('log')
-    #plt.yscale('log')
-    plt.xlabel('Luminosity')
+    plt.xlabel('Luminosity (1-10000 keV) [ergs]')
     plt.ylabel('Redshift')
-    plt.colorbar(label='Peak flux')
+    plt.colorbar(label='Peak photon flux [ph/s/cm^2]')
+    plt.title(title)
     plt.tight_layout()
     plt.show()
     plt.close()
@@ -90,31 +80,26 @@ def plot_peak_flux_norm(model_counts, data_counts, bins):
     plt.close()
     return
 
-def plot_peak_flux(coll_all, merg_all, coll_mod, merg_mod, data,
-            coll_model_label, merg_model_label, total_cut_model):
+def plot_peak_flux(coll_all, merg_all, coll_mod, merg_mod, data, coll_model_label, merg_model_label, total_cut_model, bins=None, sim=False):
     total_model = np.concatenate([coll_all,merg_all])
-    bins=np.logspace(-1, 3, 70)
-    #bins = np.logspace(-10, -5, 200)
     # Unnormalized plots of all data
     plt.hist(coll_all, bins=bins, histtype='step', label=coll_model_label)
     plt.hist(merg_all, bins=bins, histtype='step', label=merg_model_label)
     plt.hist(total_model, bins=bins, histtype='step', label='All Model')
-    plt.hist(data, bins=bins, histtype='step', linewidth=2, label='Data')
+    if sim is not True:
+        plt.hist(data, bins=bins, histtype='step', linewidth=2, label='Data')
     plt.hist(total_cut_model, bins=bins, histtype='step', linewidth=2, label='Model Total Detected')
     plt.xscale('log')
-    plt.xlabel('1s Peak Flux [1-10,000 keV]')
+    plt.xlabel('1-s Peak Flux (1-10,000 keV)')
     plt.ylabel('Number of GRBs')
     plt.legend()
-    #plt.show()
+    plt.show()
     plt.close()
 
-    # Unnormalized cut peak flux
-    bins=np.logspace(-1, 3, 40)
-    #bins = np.logspace(-11, -7, 200)
-    #plt.hist(coll_mod, bins=bins, histtype='step', label=coll_model_label)
-    #plt.hist(merg_mod, bins=bins, histtype='step', label=merg_model_label)
-    plt.hist(total_cut_model, bins=bins, histtype='step', label='Model (All)')
-    plt.hist(data, bins=bins, histtype='step', label='Data (All)')
+    # Detected peak fluxes
+    plt.hist(total_cut_model, bins=bins, histtype='step', edgecolor='C03', label='Model Total Detected')
+    if sim is not True:
+        plt.hist(data, bins=bins, histtype='step', edgecolor='C04', label='Data')
     plt.xscale('log')
     plt.legend()
     plt.show()
@@ -150,14 +135,21 @@ def plot_duration(x, y):
     return
 
 
-def trace(step, x, label=None):
+def trace(step, x, label=None, xlog=False, ylog=False):
     # Trace plots of parameters
+    if ylog is not False:
+        plt.yscale('log')
     plt.plot(step, x, label=label)
     plt.legend()
     plt.xlabel('iteration')
     plt.title('Trace Plot')
     plt.show()
     plt.close()
+    #plt.hist(x, label=label)
+    #plt.legend()
+    #plt.xlabel(label)
+    #plt.show()
+    #plt.close()
     return
 
 
