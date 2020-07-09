@@ -53,6 +53,7 @@ def draw_samples(pdf, cdf, draws=None, num_draw=1000):
     Returns:
     sample: array of randomly drawn values from the pdf
     """
+    draws = random.random(num_draw)
     sample = [pdf[np.searchsorted(cdf, draws)]][0]
     return sample
     
@@ -94,7 +95,7 @@ plot=False):
     return pdf_normed, A
 
 
-def sample_distribution(xs, pdf, draws=None, num_draw=1000, plot=False, xlabel=None,
+def sample_distribution(xs, pdf, num_draw=1000, plot=False, xlabel=None,
 xlog=False, ylog=False):
     """
     # Sample luminosity and redshift distributions
@@ -116,10 +117,10 @@ xlog=False, ylog=False):
     """
     cdf = np.cumsum(pdf)
     cdf_normed = np.array([c/cdf[-1] for c in cdf])
-    random_xs = test_draw_samples(xs, cdf_normed, draws, num_draw=num_draw)
+    random_xs = draw_samples(xs, cdf_normed, num_draw=num_draw)
     if plot is not False:
         plot_cdf(xs, cdf_normed, xlabel, xlog, ylog)
-    return random_xs#, cdf_normed
+    return random_xs
     
 
 def source_rate_density(redshifts, rho0=1., z_star=1., n1=1., n2=1.,
@@ -180,7 +181,7 @@ def intrinsic_duration(durations, mu=1, sigma=1, plot=False):
 Calculate peak flux
 """
 def Peak_flux(L=None,z=None, threshold=1., kcorr=None, emin=10, emax=1000,
-dl=None, plotting=False, sim=False, dsim=False):
+dl=None, plotting=False, sim=False, dsim=False, title=None):
     # Peak photon flux
     pf = (1+z) * (L / (4 * np.pi * dl**2)) * kcorr
     corr_pf = np.array(pf)
@@ -201,7 +202,8 @@ dl=None, plotting=False, sim=False, dsim=False):
         final_z = z[detected]
         # Plot stuff
         if plotting is not False:
-            plot_peak_flux_color(final_l, final_z, final_pf)
+            plot_peak_flux_color(L,z,corr_pf, title=title)
+            plot_peak_flux_color(final_l, final_z, final_pf, title=title)
             plot_obs_lum(final_l)
             plot_obs_rate(final_z)
         return corr_pf, final_pf

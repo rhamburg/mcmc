@@ -51,15 +51,13 @@ dl=None, plot_GRB=None, prior=False, sim=False, dsim=False, file=None):
     print (N_coll, N_merg)
     
     # Draw random redshifts from collapsar pdf
-    coll_draws = random.random(N_coll)
-    merg_draws = random.random(N_merg)
     redshift_sample_coll = sample_distribution(redshifts,
-        redshift_pdf_coll, draws=coll_draws, xlabel='Redshift', ylog=False,
-        plot=plot_func)
+        redshift_pdf_coll, xlabel='Redshift', ylog=False,
+        num_draw=N_coll, plot=plot_func)
     # Draw random redshifts from merger pdf
     redshift_sample_merg = sample_distribution(redshifts,
-        redshift_pdf_merg, draws=merg_draws, xlabel='Redshift', ylog=False,
-        plot=plot_func)
+        redshift_pdf_merg, xlabel='Redshift', ylog=False,
+        num_draw=N_merg, plot=plot_func)
 
     # Plot randomly drawn samples and pdf to ensure sim is done correctly
     if plot_func is not False:
@@ -90,45 +88,41 @@ dl=None, plot_GRB=None, prior=False, sim=False, dsim=False, file=None):
 
     # Draw random collapsar luminosities from pdf
     lum_sample_coll = sample_distribution(luminosities,
-        lum_pdf_coll, draws=coll_draws,
-        xlabel='Peak Luminosity (1-10,000 keV)[ergs/s]',
-        xlog=True, ylog=False, plot=plot_func)
+        lum_pdf_coll, xlabel='Peak Luminosity (1-10,000 keV)[ergs/s]',
+        num_draw=N_coll, xlog=True, ylog=False, plot=plot_func)
     # Draw random merger luminosities from pdf
     lum_sample_merg = sample_distribution(luminosities,
-        lum_pdf_merg, draws=merg_draws,
-        xlabel='Peak Luminosity (1-10,000 keV)[ergs/s]',
-        xlog=True, ylog=False, plot=plot_func)
+        lum_pdf_merg, xlabel='Peak Luminosity (1-10,000 keV)[ergs/s]',
+        num_draw=N_merg, xlog=True, ylog=False, plot=plot_func)
     
     # Plot randomly drawn samples and pdf to ensure sim is done correctly
     if plot_func is not False:
         bins = np.logspace(50, 54, 60)
         plot_samples(lum_sample_coll, luminosities, lum_pdf_coll, bins=bins, xlog=True, ylog=True)
         plot_samples(lum_sample_merg, luminosities, lum_pdf_merg, bins=bins, xlog=True, ylog=True)
-    
+    '''
     ## Duration
     # Collapsar duration pdf
     coll_dur_pdf = intrinsic_duration(durations, mu=ps[par_dict["coll mu"]], sigma=ps[par_dict["coll sigma"]], plot=plot_func)
-    dur_sample_coll = sample_distribution(durations, coll_dur_pdf, plot=plot_func, draws=coll_draws)
+    dur_sample_coll = sample_distribution(durations, coll_dur_pdf, num_draw=N_coll, plot=plot_func)
     # Merger duration pdf
-    merg_dur_pdf = intrinsic_duration(durations, mu=ps[par_dict["merg mu"]], sigma=ps[par_dict["merg sigma"]], plot=plot_func)
-    dur_sample_merg = sample_distribution(durations, merg_dur_pdf, plot=plot_func, draws=merg_draws)
+    merg_dur_pdf = intrinsic_duration(durations, mu=ps[par_dict["merg mu"]], sigma=ps[par_dict["merg sigma"]], num_draw=N_merg, plot=plot_func)
+    dur_sample_merg = sample_distribution(durations, merg_dur_pdf, plot=plot_func)
     
     # Plot randomly drawn samples and pdf to ensure sim is done correctly
     if plot_func is not False:
         bins = np.logspace(-3, 3, 60)
         plot_samples(dur_sample_coll, durations, coll_dur_pdf, bins=bins, xlog=True)
-    
+    '''
     ## Peak flux
     # Get model peak flux for simulated collapsar GRBs
     coll_pf_all, coll_pf = Peak_flux(L=lum_sample_coll,
         z=redshift_sample_coll, kcorr=coll_kc, dl=coll_dl,
-        emin=detector.getfloat('nai_emin'),
-        emax=detector.getfloat('nai_emax'), plotting=plot_GRB, sim=sim, dsim=dsim)
+        emin=detector.getfloat('nai_emin'), emax=detector.getfloat('nai_emax'), plotting=plot_GRB, sim=sim, dsim=dsim, title='Collapsars')
     # Get model peak flux for simulated collapsar GRBs
     merg_pf_all, merg_pf = Peak_flux(L=lum_sample_merg,
         z=redshift_sample_merg, kcorr=merg_kc, dl=merg_dl,
-        emin=detector.getfloat('nai_emin'),
-        emax=detector.getfloat('nai_emax'), plotting=plot_GRB, sim=sim, dsim=dsim)
+        emin=detector.getfloat('nai_emin'),emax=detector.getfloat('nai_emax'), plotting=plot_GRB, sim=sim, dsim=dsim, title='Mergers')
 
     # Combine collapsar and merger model counts
     pf_model, pf_data = combine_data(coll_model=coll_pf, merg_model=merg_pf,
