@@ -26,13 +26,13 @@ dict = {
 def plot_trace(results, steps, num_param):
     for par in range(num_param):
         keyword = [x for x,y in dict.items() if y==par]
-        trace(steps, results[:, par], label=keyword[0], ylog=True)
+        trace(steps, results[:, par], label=keyword[0], ylog=False)
     return
 
 
-num_param = 4
+num_param = 12
 # Load results
-filename = '../results/test_prior_log4.npy'
+filename = '../results/luminosity_v00.npy'
 results = np.load(filename)
 
 '''
@@ -73,12 +73,13 @@ merg_beta = results[:,dict["merg beta"]][::num_param]
 
 
 # Show trace plots
-plot_trace(results, steps, num_param)
+#plot_trace(results, steps, num_param)
 
-'''
+
 # Plot autocorrelation
-plot_autocorrelation([collz1, collz2, collzpeak, coll_local], maxlag=300, label=['collapsar low-z index', 'collapsar high-z index', 'collapsar peak z', 'collapsar local rate'])
-plot_autocorrelation([mergz1, mergz2, mergzpeak, merg_local], maxlag=300, label=['merger low-z index', 'merger high-z index', 'merger peak z', 'merger local rate'])
+#plot_autocorrelation([collz1, collz2, collzpeak, coll_local], maxlag=300, label=['collapsar low-z index', 'collapsar high-z index', 'collapsar peak z', 'collapsar local rate'])
+#plot_autocorrelation([mergz1, mergz2, mergzpeak, merg_local], maxlag=300, label=['merger low-z index', 'merger high-z index', 'merger peak z', 'merger local rate'])
+#plot_autocorrelation([coll_alpha, coll_beta, merg_alpha, merg_beta], maxlag=300, label=['collapsar luminosity low index', 'collapsar luminosity high index', 'merger luminosity low index', 'merger luminosity high index'])
 
 # Find autocorrelation time
 print ('Input max lag:')
@@ -89,9 +90,10 @@ labels = ['coll z1', 'coll z2', 'coll z*', 'coll rho0', 'merg z1', 'merg z2', 'm
 parameter_vector = [collz1[::atime], collz2[::atime], collzpeak[::atime], coll_local[::atime], mergz1[::atime], mergz2[::atime], mergzpeak[::atime], merg_local[::atime]]
 plot_grid_general(parameter_vector, labels)
 '''
-
-# Calculate correlation ?
-
+labels = ['coll alpha', 'coll beta', 'merg alpha', 'merg beta']
+parameter_vector = [coll_alpha[::atime], coll_beta[::atime], merg_alpha[::atime], merg_beta[::atime]]
+plot_grid_general(parameter_vector, labels)
+'''
 
 '''
 # find acceptance ratio for each parameter

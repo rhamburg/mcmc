@@ -81,11 +81,12 @@ def plot_peak_flux_norm(model_counts, data_counts, bins):
     return
 
 def plot_peak_flux(coll_all, merg_all, coll_mod, merg_mod, data, coll_model_label, merg_model_label, total_cut_model, bins=None, sim=False):
-    total_model = np.concatenate([coll_all,merg_all])
     # Unnormalized plots of all data
-    plt.hist(coll_all, bins=bins, histtype='step', label=coll_model_label)
-    plt.hist(merg_all, bins=bins, histtype='step', label=merg_model_label)
-    plt.hist(total_model, bins=bins, histtype='step', label='All Model')
+    if coll_all is not None:
+        plt.hist(coll_all, bins=bins, histtype='step', label=coll_model_label)
+        plt.hist(merg_all, bins=bins, histtype='step', label=merg_model_label)
+        total_model = np.concatenate([coll_all,merg_all])
+        plt.hist(total_model, bins=bins, histtype='step', label='All Model')
     if sim is not True:
         plt.hist(data, bins=bins, histtype='step', linewidth=2, label='Data')
     plt.hist(total_cut_model, bins=bins, histtype='step', linewidth=2, label='Model Total Detected')
@@ -191,12 +192,29 @@ def plot_grid_general(parameters, labels, numbins=20, dot_size=1):
             
             # Make histogram of parameter
             if i == j:
+                '''
+                if i==2 or i==6:
+                    plt.xscale('log')
+                    numbins = np.logspace(-5, 1.5, 20)
+                elif i==3 or i==7:
+                    plt.xscale('log')
+                    numbins = np.logspace(-2, 1.5, 20)
+                else:
+                    numbins = 20
+                '''
                 h = plt.hist(parameters[i], bins=numbins, histtype='step')
                 plt.vlines(np.median(parameters[i]), 0, np.max(h[0]), linestyle='--', color='red')
+                #plt.tick_params(axis='y', which='both',bottom=False,top=False,labelbottom=False)
             # Make scatter plots of parameters
             else:
                 plt.scatter(parameters[j], parameters[i], s=dot_size)
-            
+                #plt.tick_params(axis='both', which='both',bottom=False,top=False,labelbottom=False)
+                '''
+                if j==2 or j==3 or j==6 or j==7:
+                    plt.xscale('log')
+                if i==2 or i==3 or i==7 or i==6:
+                    plt.yscale('log')
+                '''
             # Add plot labels
             if j == 0:
                 plt.ylabel(labels[i])

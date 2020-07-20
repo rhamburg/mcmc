@@ -212,8 +212,9 @@ for i in range(0, args.iter+1):
         parameter_space[i][post_idx] = Simulation(parameter_space[i],
             parameter_dict, num_param, detector=detector, durations=durations,
             redshifts=redshifts, luminosities=luminosities, obs_pf=obs_pf,
-            dl=dl, options=options, vol_arr=v_comov, kc=kcorr, plot_GRB=plot,
-            prior=args.prior, sim=make_sim_data, file=args.filename, dsim=dsim)
+            obs_t90=obs_t90, dl=dl, options=options, vol_arr=v_comov, kc=kcorr,
+            plot_GRB=plot, prior=args.prior, sim=make_sim_data, file=args.filename,
+            dsim=dsim)
 
     if i > 0:
         # Previous parameter_space entry with parameter pdx

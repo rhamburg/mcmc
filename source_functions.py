@@ -180,7 +180,7 @@ def intrinsic_duration(durations, mu=1, sigma=1, plot=False):
 """
 Calculate peak flux
 """
-def Peak_flux(L=None,z=None, threshold=1., kcorr=None, emin=10, emax=1000,
+def Peak_flux(L=None,z=None, threshold=1., kcorr=None,
 dl=None, plotting=False, sim=False, dsim=False, title=None):
     # Peak photon flux
     pf = (1+z) * (L / (4 * np.pi * dl**2)) * kcorr
@@ -206,7 +206,7 @@ dl=None, plotting=False, sim=False, dsim=False, title=None):
             plot_peak_flux_color(final_l, final_z, final_pf, title=title)
             plot_obs_lum(final_l)
             plot_obs_rate(final_z)
-        return corr_pf, final_pf
+        return corr_pf, final_pf, final_z
     else:
         return [], []
 
