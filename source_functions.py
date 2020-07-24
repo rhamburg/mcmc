@@ -39,7 +39,7 @@ def read_data(data_file=None, type='all'):
         return file["col5"], file["col3"]
 
 
-def draw_samples(pdf, cdf, draws=None, num_draw=1000):
+def draw_samples(pdf, cdf, draws=None, num_draw=1000, memtype=None):
     """
     # Find cdf interval j such that the random number is in that interval
     # Draw randomly from a distribution
@@ -54,7 +54,12 @@ def draw_samples(pdf, cdf, draws=None, num_draw=1000):
     sample: array of randomly drawn values from the pdf
     """
     draws = random.random(num_draw)
+    #d = draws.astype(np.float16)
+    #c = cdf.astype(np.float16)
     sample = [pdf[np.searchsorted(cdf, draws)]][0]
+    if memtype is not None:
+        pass
+        #sample = sample.astype(np.float16)
     return sample
     
     
@@ -206,7 +211,7 @@ dl=None, plotting=False, sim=False, dsim=False, title=None):
             plot_peak_flux_color(final_l, final_z, final_pf, title=title)
             plot_obs_lum(final_l)
             plot_obs_rate(final_z)
-        return corr_pf, final_pf, final_z
+        return corr_pf, final_pf
     else:
         return [], []
 

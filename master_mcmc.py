@@ -186,6 +186,8 @@ pdx = 0
 total_accept = 0
 # effective step
 eff_step = 1
+# array for draws
+draws = [0, 0, 0, 0, 0, 0, 0, 0]
 
 for i in range(0, args.iter+1):
     print ('step', i)
@@ -209,12 +211,7 @@ for i in range(0, args.iter+1):
     if np.isinf(parameter_space[i][pdx]) == True:
         parameter_space[i][post_idx] = parameter_space[i][pdx]
     else:
-        parameter_space[i][post_idx] = Simulation(parameter_space[i],
-            parameter_dict, num_param, detector=detector, durations=durations,
-            redshifts=redshifts, luminosities=luminosities, obs_pf=obs_pf,
-            obs_t90=obs_t90, dl=dl, options=options, vol_arr=v_comov, kc=kcorr,
-            plot_GRB=plot, prior=args.prior, sim=make_sim_data, file=args.filename,
-            dsim=dsim)
+        parameter_space[i][post_idx] = Simulation(parameter_space[i], pdx, draws, parameter_dict, num_param, detector=detector, durations=durations, redshifts=redshifts, luminosities=luminosities, obs_pf=obs_pf, obs_t90=obs_t90, dl=dl, options=options, vol_arr=v_comov, kc=kcorr, plot_GRB=plot, prior=args.prior, sim=make_sim_data, file=args.filename, dsim=dsim)
 
     if i > 0:
         # Previous parameter_space entry with parameter pdx

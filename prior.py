@@ -6,11 +6,11 @@ parameter_bounds = {
 "coll z1":    [0, 5, 'uniform'],
 "coll z2":    [-5, 0, 'uniform'],
 "coll z*":    [1e-5, 6, 'log-uniform'],
-"coll rho0":  [0.01,10, 'log-uniform'], # need to change
+"coll rho0":  [0.1, 10, 'log-uniform'], # need to change
 "merg z1":    [0, 5, 'uniform'],
 "merg z2":    [-5, 0, 'uniform'],
 "merg z*":    [1e-5, 6, 'log-uniform'],
-"merg rho0":  [0.01,10, 'log-uniform'], # need to change
+"merg rho0":  [300, 5000, 'log-uniform'], # need to change
 "coll alpha": [-5, 0, 'uniform'],
 "coll beta":  [-5, 0, 'uniform'],
 "merg alpha": [-5, 0, 'uniform'],
