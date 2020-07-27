@@ -30,21 +30,10 @@ def plot_trace(results, steps, num_param):
     return
 
 
-num_param = 12
+num_param = 16
 # Load results
-filename = '../results/luminosity_v00.npy'
+filename = '../duration_prior_test.npy'
 results = np.load(filename)
-
-'''
-#results = np.delete(results, slice(50001,100001), 0)
-#results = results[1:] # cut off initial row
-# Optional concatenating of second array
-file2 = '/Users/rachelhamburg/Dropbox/FermiWork Team Folder/GradSchool/Dissertation/project/mcmc/results/test8b.npy'
-results2 = np.load(file2)
-results2 = np.delete(results2, slice(50001,100001), 0)
-results2 = results2[1:] # cut off the initial row, which was last of previous
-results = np.concatenate([results, results2])
-'''
 
 # Parameters
 steps = np.arange(0, len(results))
@@ -67,13 +56,18 @@ coll_beta = results[:,dict["coll beta"]][::num_param]
 merg_alpha = results[:,dict["merg alpha"]][::num_param]
 merg_beta = results[:,dict["merg beta"]][::num_param]
 
+coll_mu = results[:,dict["coll mu"]][::num_param]
+coll_sigma = results[:,dict["coll sigma"]][::num_param]
+merg_mu = results[:,dict["merg mu"]][::num_param]
+merg_sigma = results[:,dict["merg sigma"]][::num_param]
+
 #LLR = results[:,dict["posterior"]]
 #accepted = results[:,dict["acceptance ratio"]]
 #effective_step = results[:,dict["effective step"]]
 
 
 # Show trace plots
-#plot_trace(results, steps, num_param)
+plot_trace(results, steps, num_param)
 
 
 # Plot autocorrelation
@@ -82,13 +76,13 @@ merg_beta = results[:,dict["merg beta"]][::num_param]
 #plot_autocorrelation([coll_alpha, coll_beta, merg_alpha, merg_beta], maxlag=300, label=['collapsar luminosity low index', 'collapsar luminosity high index', 'merger luminosity low index', 'merger luminosity high index'])
 
 # Find autocorrelation time
-print ('Input max lag:')
-atime = int(input())
+#print ('Input max lag:')
+#atime = int(input())
 
 # Plot parameter grid (using knowledge from autocorrelation time)
-labels = ['coll z1', 'coll z2', 'coll z*', 'coll rho0', 'merg z1', 'merg z2', 'merg z*', 'merg rho0']
-parameter_vector = [collz1[::atime], collz2[::atime], collzpeak[::atime], coll_local[::atime], mergz1[::atime], mergz2[::atime], mergzpeak[::atime], merg_local[::atime]]
-plot_grid_general(parameter_vector, labels)
+#labels = ['coll z1', 'coll z2', 'coll z*', 'coll rho0', 'merg z1', 'merg z2', 'merg z*', 'merg rho0']
+#parameter_vector = [collz1[::atime], collz2[::atime], collzpeak[::atime], coll_local[::atime], mergz1[::atime], mergz2[::atime], mergzpeak[::atime], merg_local[::atime]]
+#plot_grid_general(parameter_vector, labels)
 '''
 labels = ['coll alpha', 'coll beta', 'merg alpha', 'merg beta']
 parameter_vector = [coll_alpha[::atime], coll_beta[::atime], merg_alpha[::atime], merg_beta[::atime]]

@@ -6,25 +6,25 @@ parameter_bounds = {
 "coll z1":    [0, 5, 'uniform'],
 "coll z2":    [-5, 0, 'uniform'],
 "coll z*":    [1e-5, 6, 'log-uniform'],
-"coll rho0":  [0.1, 10, 'log-uniform'], # need to change
+"coll rho0":  [0.1, 10, 'log-uniform'],
 "merg z1":    [0, 5, 'uniform'],
 "merg z2":    [-5, 0, 'uniform'],
 "merg z*":    [1e-5, 6, 'log-uniform'],
-"merg rho0":  [300, 5000, 'log-uniform'], # need to change
+"merg rho0":  [300, 5000, 'log-uniform'], # from LIGO O2
 "coll alpha": [-5, 0, 'uniform'],
 "coll beta":  [-5, 0, 'uniform'],
 "merg alpha": [-5, 0, 'uniform'],
 "merg beta":  [-5, 0, 'uniform'],
-"coll mu":    [1e-3,100, 'log-uniform'], # need to change these !!!
-"coll sigma": [1e-3, 10, 'log-uniform'],
-"merg mu":    [1e-3, 10, 'log-uniform'],
-"merg sigma": [1e-3, 10, 'log-uniform']
+"coll mu":    [-1, 10, 'uniform'], # need to check prior distributions
+"coll sigma": [0.1, 2, 'uniform'],
+"merg mu":    [-5, 5, 'uniform'],
+"merg sigma": [0.1, 2, 'uniform']
 }
 #coll_lpeak = [1e49, 1e54]
 #merg_lpeak = [1e49, 1e54]
 
 
-def proposal_distribution(parameter, x, tuning=1):
+def proposal_distribution(parameter, x, tuning=3):
     """
     Pick new parameter
     

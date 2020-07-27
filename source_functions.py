@@ -21,22 +21,23 @@ def read_data(data_file=None, type='all'):
     
     Returns:
     ------------
-    peak fluxes, durations lists
+    peak fluxes: lists
+    durations: lists
     """
     # Read from standard ascii file
-    file = ascii.read("../data/gbm_bursts_t90_flux.txt", data_start=1)
+    file = ascii.read("../data/gbm_bursts_t90_flux.txt", header_start=0, delimiter='|')
     if data_file is not None:
         # Read simulated data from numpy file
         data_file = np.load(data_file)
-        return data_file, file["col3"] # BAD CODING HERE NEED TO CHANGE
+        return data_file, file["t90"]
     if type == 'long':
-        long_GRBs = file[np.where(file["col3"]>2.)]
-        return long_GRBs["col5"], long_GRBs["col3"]
+        long_GRBs = file[np.where(file["t90"]>2.)]
+        return long_GRBs["flux_1024"], long_GRBs["t90"]
     elif type == 'short':
-        short_GRBs = file[np.where(file["col3"]<2.)]
-        return peak_flux_long["col5"], short_GRBs["col3"]
+        short_GRBs = file[np.where(file["t90"]<2.)]
+        return short_GRBs["flux_1024"], short_GRBs["t90"]
     else:
-        return file["col5"], file["col3"]
+        return file["flux_1024"], file["t90"]
 
 
 def draw_samples(pdf, cdf, draws=None, num_draw=1000, memtype=None):
@@ -54,9 +55,11 @@ def draw_samples(pdf, cdf, draws=None, num_draw=1000, memtype=None):
     sample: array of randomly drawn values from the pdf
     """
     draws = random.random(num_draw)
-    #d = draws.astype(np.float16)
-    #c = cdf.astype(np.float16)
+    #draws = draws.astype(np.float16)
+    #cdf = cdf.astype(np.float16)
+    #sim = time.time()
     sample = [pdf[np.searchsorted(cdf, draws)]][0]
+    #print ('searchsorted time', time.time()-sim)
     if memtype is not None:
         pass
         #sample = sample.astype(np.float16)
@@ -191,7 +194,7 @@ dl=None, plotting=False, sim=False, dsim=False, title=None):
     pf = (1+z) * (L / (4 * np.pi * dl**2)) * kcorr
     corr_pf = np.array(pf)
     if sim is not False or dsim is not False:
-        return corr_pf, corr_pf
+        return corr_pf, corr_pf, z
     # Correct for GBM FOV
     if len(corr_pf) > 0:
         num_fov = int(len(corr_pf) * 0.67 * 0.85)
@@ -211,9 +214,9 @@ dl=None, plotting=False, sim=False, dsim=False, title=None):
             plot_peak_flux_color(final_l, final_z, final_pf, title=title)
             plot_obs_lum(final_l)
             plot_obs_rate(final_z)
-        return corr_pf, final_pf
+        return corr_pf, final_pf, final_z
     else:
-        return [], []
+        return [], [], []
 
 
 """
@@ -254,9 +257,7 @@ def log_likelihood(model_counts, data_counts):
     return LLR
 
 
-def combine_data(coll_model=None, merg_model=None, data=None, coll_all=None,
-merg_all=None, show_plot=False, coll_model_label=None, merg_model_label=None,
-data_label=None, sim=False):
+def combine_data(coll_model=None, merg_model=None, data=None, coll_all=None, merg_all=None, show_plot=False, coll_model_label=None, merg_model_label=None, data_label=None, sim=False):
     """
     Combine data to prepare for LLR calculation
 

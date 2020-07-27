@@ -37,7 +37,6 @@ def Simulation(ps, pdx, draws, par_dict, num_param, redshifts=None, luminosities
         N_coll = np.int(N_coll*11.5)
         
         # Draw random redshifts from collapsar pdf
-        print (len(redshifts), len(redshift_pdf_coll), type(redshifts), type(redshift_pdf_coll))
         redshift_sample_coll = sample_distribution(redshifts,
             redshift_pdf_coll, xlabel='Redshift', ylog=False,
             num_draw=N_coll, plot=plot_func)
@@ -131,19 +130,19 @@ def Simulation(ps, pdx, draws, par_dict, num_param, redshifts=None, luminosities
         bins = np.logspace(50, 54, 60)
         plot_samples(lum_sample_coll, luminosities, lum_pdf_coll, bins=bins, xlog=True, ylog=True)
         plot_samples(lum_sample_merg, luminosities, lum_pdf_merg, bins=bins, xlog=True, ylog=True)
-        
+    print (N_coll, N_merg)
     
     ## Peak flux
     # Get model peak flux for simulated collapsar GRBs
-    coll_pf_all, coll_pf = Peak_flux(L=lum_sample_coll,
+    coll_pf_all, coll_pf, coll_z = Peak_flux(L=lum_sample_coll,
         z=redshift_sample_coll, kcorr=coll_kc, dl=coll_dl, plotting=plot_GRB,
         sim=sim, dsim=dsim, title='Collapsars')
     # Get model peak flux for simulated collapsar GRBs
-    merg_pf_all, merg_pf = Peak_flux(L=lum_sample_merg,
+    merg_pf_all, merg_pf, merg_z = Peak_flux(L=lum_sample_merg,
         z=redshift_sample_merg, kcorr=merg_kc, dl=merg_dl, plotting=plot_GRB,
         sim=sim, dsim=dsim, title='Mergers')
 
-    '''
+    
     ## Duration
     # Collapsar duration pdf
     coll_dur_pdf = intrinsic_duration(durations, mu=ps[par_dict["coll mu"]], sigma=ps[par_dict["coll sigma"]], plot=plot_func)
@@ -154,26 +153,23 @@ def Simulation(ps, pdx, draws, par_dict, num_param, redshifts=None, luminosities
     dur_sample_merg = sample_distribution(durations, merg_dur_pdf, num_draw=len(merg_pf), plot=plot_func)
     
     # Plot randomly drawn samples and pdf to ensure sim is done correctly
-    #if plot_func is not False:
-    bins = np.logspace(-2, 3, 60)
-    plot_samples(dur_sample_coll, durations, coll_dur_pdf, bins=bins, xlog=True)
-    plot_samples(dur_sample_merg, durations, merg_dur_pdf, bins=bins, xlog=True)
-    
+    if plot_func is not False:
+        bins = np.logspace(-2, 3, 60)
+        plot_samples(dur_sample_coll, durations, coll_dur_pdf, bins=bins, xlog=True)
+        plot_samples(dur_sample_merg, durations, merg_dur_pdf, bins=bins, xlog=True)
     
     #Also need to adjust duration energy range to match t90 somehow...
     
     # Observed duration is longer than source duration
     dur_sample_coll *= (coll_z + 1)
     dur_sample_merg *= (merg_z + 1)
-    '''
+    
+    
     # Combine collapsar and merger model counts
-    pf_model, pf_data = combine_data(coll_model=coll_pf,merg_model=merg_pf,
-        data=obs_pf, coll_all=coll_pf_all, merg_all=merg_pf_all,
-        coll_model_label='Collapsar Model', merg_model_label='Merger Model',
-        data_label='GBM Data', show_plot=plot_GRB, sim=sim)
+    pf_model, pf_data = combine_data(coll_model=coll_pf, merg_model=merg_pf, data=obs_pf, coll_all=coll_pf_all, merg_all=merg_pf_all, coll_model_label='Collapsar Model', merg_model_label='Merger Model', data_label='GBM Data', show_plot=plot_GRB, sim=sim)
     
     # Combine collapsar and merger model durations
-    #dur_model, dur_data = combine_data(coll_model=dur_sample_coll, merg_model=dur_sample_merg, data=obs_t90, coll_all=dur_sample_coll, merg_all=dur_sample_merg, show_dur_plot=True)#plot_GRB)
+    dur_model, dur_data = combine_data(coll_model=dur_sample_coll, merg_model=dur_sample_merg, data=obs_t90, coll_all=dur_sample_coll, merg_all=dur_sample_merg, coll_model_label='Collapsar Model', merg_model_label='Merger Model', show_plot=plot_GRB)
 
     # Save peak flux data
     if sim is not False and file is not None:
@@ -185,8 +181,8 @@ def Simulation(ps, pdx, draws, par_dict, num_param, redshifts=None, luminosities
     # Calculate the likelihood for this model (i.e., these parameters)
     try:
         pf_llr = log_likelihood(model_counts=pf_model, data_counts=pf_data)
-        dur_llr = 0#log_likelihood(model_counts=dur_model, data_counts=dur_data)
-      
+        dur_llr = log_likelihood(model_counts=dur_model, data_counts=dur_data)
+        #print (pf_llr, dur_llr)
         # set uniform priors for right now
         ln_prior = 0
         for n in range(num_param):
